@@ -2,9 +2,8 @@
 
 Plugin to replicate the DraggabePanel functionality as in Draggable panel in Android.
 
-Here the main class is DraggablePannel with accepts two (top and bottom) widget.
-When the top panel is dragged to bottom it is scaled down using the scale factor.
-You can choose to either go by Scale or go with minWidth & minHeight for top widget.
+When the top widget is dragged to bottom it is scaled down using the scale factor.
+You can choose to either go by Scale or go with minWidth & minHeight.
 
 ### Code
 Two main class 1) DraggablePanel 2) DraggablePanelWithParent
@@ -54,3 +53,5 @@ Other properties of the DraggablePanel-
   - topChildDockHeight: The height when the top widget is dragged down
   - listener: Listener to get callback when the panel is Dragged, minimised, maximised
   - defaultShow: Initial state of panel show/hide
+
+### Note: As you can see we have to place every widget inside same stack to access the touch event from panel when minimised.I am looking for something which may allow us to pass touch events to back widget without placing them in same stack. In case you find anything let me know.
