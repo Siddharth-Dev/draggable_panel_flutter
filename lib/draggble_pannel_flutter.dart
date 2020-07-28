@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import 'drag_listener.dart';
+
 class DraggablePanel extends StatefulWidget {
 
   final Widget topChild;
@@ -298,10 +300,4 @@ class DraggableState extends State<DraggablePanel> {
       _lowerLimit = screenSize.height;
     }
   }
-}
-
-abstract class DragListener {
-  onMinimised();
-  onMaximised();
-  onDrag(double dragPosition);
 }
