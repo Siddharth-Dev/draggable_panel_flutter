@@ -10,15 +10,16 @@ class DraggablePanel extends StatefulWidget {
   final double topChildDockWidth;
   final bool scale;
   final double scaleBy;
+  final bool defaultShow;
   final DragListener listener;
 
-  DraggablePanel({Key key, @required this.topChild, @required this.bottomChild, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.scale = true, this.scaleBy = .75, this.listener}): super(key: key) {
+  DraggablePanel({Key key, @required this.topChild, @required this.bottomChild, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.scale = true, this.scaleBy = .75, this.listener, this.defaultShow}): super(key: key) {
     assert(topChild != null);
     assert(bottomChild != null);
   }
 
   @override
-  DraggableState createState() => DraggableState();
+  DraggableState createState() => DraggableState(defaultShow);
 
 }
 
@@ -41,6 +42,8 @@ class DraggableState extends State<DraggablePanel> {
   double _upperLimit, _lowerLimit;
   double _scale = 1;
 
+  DraggableState(this._hide);
+
   show() {
     setState(() {
       _hide = false;
@@ -58,11 +61,11 @@ class DraggableState extends State<DraggablePanel> {
   bool isMaximised() => !_isMinimised;
 
   minimise() {
-
+    _dragDown();
   }
 
   maximise() {
-
+    _dragUp();
   }
 
   @override
