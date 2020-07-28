@@ -13,7 +13,7 @@ class DraggablePanelWithParent extends StatefulWidget {
   final double scaleBy;
   final DragListener listener;
 
-  DraggablePanelWithParent({this.parent, @required this.topChild, @required this.bottomChild, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.scale = true, this.scaleBy = .75, this.listener}){
+  DraggablePanelWithParent({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.scale = true, this.scaleBy = .75, this.listener}): super(key: key) {
     assert(topChild != null);
     assert(bottomChild != null);
   }
