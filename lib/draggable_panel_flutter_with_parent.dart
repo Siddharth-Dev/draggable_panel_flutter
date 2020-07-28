@@ -99,8 +99,11 @@ class DraggableState extends State<DraggablePanelWithParent> {
           onEnd: () {
             if (isMinimised() && _pop) {
               print("Finished");
-              _hide = true;
-              setState(() {});
+              if (widget.listener != null) {
+                widget.listener.onExit();
+              } else {
+                hide();
+              }
             }
           },
           child: GestureDetector(

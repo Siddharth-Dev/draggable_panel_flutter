@@ -1,4 +1,4 @@
-import 'package:draggable_panel_flutter/draggble_panel_flutter_ignore_pointer.dart';
+import 'package:draggable_panel_flutter/draggable_panel_flutter_ignore_pointer.dart';
 import 'package:flutter/material.dart';
 
 class DraggableExampleThree extends StatelessWidget {
