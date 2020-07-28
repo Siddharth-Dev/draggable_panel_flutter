@@ -1,6 +1,6 @@
-# draggble_pannel_flutter
+# draggable_panel_flutter
 
-Plugin to replicate the DraggabePanel functionality as in Draggable panel in Android.
+Plugin to replicate the DraggablePanel functionality as in Draggable panel in Android.
 
 When the top widget is dragged to bottom it is scaled down using the scale factor.
 You can choose to either go by Scale or go with minWidth & minHeight.
