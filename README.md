@@ -36,8 +36,14 @@ DraggablePanelWithParent(
   bottomChild: Container(color:  Colors.red,),)
 ```
 With above you will be able to touch parent container and can perform action on the same.
+You can also perform operation like show/hide panel, add widgets in between Parent and Panel by accessing the panel state:
+```
+GlobalKey<DraggableState> _draggableKey = GlobalKey<DraggableState>();
+_draggableKey.currentState.show();
+_draggableKey.currentState.addWidgetInBetween(Scaffold(body: Container(),));
+```
 
-Other properties of the DraggablePannel-
+Other properties of the DraggablePanel-
   - parent: Parent Widget, widget that you want to place behind the DraggablePanel. Only available in DraggablePanelWithParent class.
   - topChild: The widget you want to show at top of panel
   - bottomChild: The widget you want to show after top widget, that covers the remainig panel area.
