@@ -47,7 +47,7 @@ Other properties of the DraggablePanel-
   - parent: Parent Widget, widget that you want to place behind the DraggablePanel. Only available in DraggablePanelWithParent class.
   - topChild: The widget you want to show at top of panel
   - bottomChild: The widget you want to show after top widget, that covers the remainig panel area.
-  - scale: Whether to use the sacle factor when reduring the top widget on dragging
+  - scale: Whether to use the scale factor when reducing the top widget on dragging
   - scaleBy: The factor by which the scale is done (default is .75)
   - topChildHeight: The height of the top widget
   - topChildDockWidth: The width when the top widget is dragged down
