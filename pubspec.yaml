@@ -1,7 +1,7 @@
 name: draggable_panel_flutter
-description: Plugin to replicate the DraggablePanel functionality as in Draggable panel in Android.
+description: A new Flutter plugin.
 version: 0.0.1
-author: Siddharth Jain (siddharth11241@gmail.com)
+author:
 homepage:
 
 environment:
@@ -25,7 +25,6 @@ flutter:
   # The 'pluginClass' and Android 'package' identifiers should not ordinarily
   # be modified. They are used by the tooling to maintain consistency when
   # adding or updating assets for this project.
-
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

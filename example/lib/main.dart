@@ -1,6 +1,6 @@
-import 'package:draggble_pannel_flutter_example/draggable_example_four.dart';
-import 'package:draggble_pannel_flutter_example/draggable_same_stack_example.dart';
-import 'package:draggble_pannel_flutter_example/draggable_same_stack_ignore_pointer.dart';
+import 'package:draggable_panel_flutter_example/draggable_example_four.dart';
+import 'package:draggable_panel_flutter_example/draggable_same_stack_example.dart';
+import 'package:draggable_panel_flutter_example/draggable_same_stack_ignore_pointer.dart';
 import 'package:flutter/material.dart';
 
 import 'draggable_new_screen_example.dart';

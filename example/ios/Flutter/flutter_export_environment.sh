@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
 export "FLUTTER_ROOT=/home/siddharth/flutter"
-export "FLUTTER_APPLICATION_PATH=/home/siddharth/Development/flutter_workspace/draggable_pannel_flutter/draggble_pannel_flutter/example"
+export "FLUTTER_APPLICATION_PATH=/home/siddharth/Development/flutter_workspace/draggable_panel_flutter/draggable_panel_flutter/example"
 export "FLUTTER_TARGET=lib/main.dart"
 export "FLUTTER_BUILD_DIR=build"
 export "SYMROOT=${SOURCE_ROOT}/../build/ios"

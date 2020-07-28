@@ -1,6 +1,6 @@
-# draggble_pannel_flutter_example
+# draggable_panel_flutter_example
 
-Demonstrates how to use the draggble_pannel_flutter plugin.
+Demonstrates how to use the draggable_panel_flutter plugin.
 
 ## Getting Started
 

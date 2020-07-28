@@ -1,5 +1,5 @@
-import 'package:draggble_pannel_flutter/draggble_pannel_flutter.dart';
-import 'package:draggble_pannel_flutter/transparent_page_route.dart';
+import 'package:draggable_panel_flutter/draggable_panel_flutter.dart';
+import 'package:draggable_panel_flutter/transparent_page_route.dart';
 import 'package:flutter/material.dart';
 
 class DraggableExampleOne extends StatelessWidget {
