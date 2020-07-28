@@ -47,3 +47,4 @@ Other properties of the DraggablePannel-
   - topChildDockWidth: The width when the top widget is dragged down
   - topChildDockHeight: The height when the top widget is dragged down
   - listener: Listener to get callback when the panel is Dragged, minimised, maximised
+  - defaultShow: Initial state of panel show/hide
