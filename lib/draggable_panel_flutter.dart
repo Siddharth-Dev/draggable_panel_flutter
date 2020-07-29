@@ -46,9 +46,9 @@ class DraggableState extends State<DraggablePanel> {
 
   DraggableState(this._hide);
 
-  show({bool rest = false}) {
-    if (rest) {
-      restAttributes();
+  show({bool reset = false}) {
+    if (reset) {
+      resetAttributes();
     }
     setState(() {
       _hide = false;
@@ -75,7 +75,7 @@ class DraggableState extends State<DraggablePanel> {
 
   bool isShown() => !_hide;
 
-  restAttributes({bool notifyStateChange = false}) {
+  resetAttributes({bool notifyStateChange = false}) {
     _top = 0;
     _containerWidth = screenSize.width;
     _containerHeight = widget.topChildHeight;

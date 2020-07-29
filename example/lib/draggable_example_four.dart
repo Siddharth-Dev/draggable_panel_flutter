@@ -61,7 +61,7 @@ class DraggableExampleState extends State<DraggableExampleFour> {
                 color: Colors.grey,
                 child: Text("Open Player"),
                 onPressed: (){
-                  _globalKey.currentState.show(rest: true);
+                  _globalKey.currentState.show(reset: true);
                 },
               ),
             ],

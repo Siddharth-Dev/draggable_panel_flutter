@@ -59,7 +59,7 @@ _globalKey.currentState.maximise(); // To maximise the panel
 _globalKey.currentState.minimise(); // to minimise the panel
 
 // to reset the panel values, optionally notify this state change to widget
-_globalKey.currentState.restAttributes({notifyStateChange: bool});
+_globalKey.currentState.resetAttributes({notifyStateChange: bool});
 ```
 If you pass the DragListener to the widget then you can listen for the state change
 ```
