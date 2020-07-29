@@ -1,8 +1,12 @@
 # draggable_panel_flutter
-
 Plugin to replicate the DraggablePanel functionality as in Draggable panel in Android.
-
 When the top widget is dragged to bottom it is scaled down to minimum width and height passed to the widget
+
+### Demo
+1) Draggable Panel
+![Draggable Panel demo](./gif1.gif)
+2) Opening a widget between Parent and Panel (draggable_example_four.dart)
+![Draggable Panel demo](./gif2.gif)
 
 ### Code
 Main class DraggablePanel
