@@ -13,11 +13,12 @@ class DraggablePanel extends StatefulWidget {
   final double topChildDockWidth;
   final bool scale;
   final double scaleBy;
+  final double defaultTopPadding;
   final bool defaultShow;
   final Color backgroundColor;
   final DragListener listener;
 
-  DraggablePanel({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.scale = true, this.scaleBy = .75, this.listener, this.defaultShow = true, this.backgroundColor = Colors.transparent}): super(key: key) {
+  DraggablePanel({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.scale = true, this.scaleBy = .75, this.listener, this.defaultShow = true, this.backgroundColor = Colors.transparent, this.defaultTopPadding}): super(key: key) {
     assert(topChild != null);
     assert(bottomChild != null);
   }
@@ -30,6 +31,7 @@ class DraggablePanel extends StatefulWidget {
 class DraggableState extends State<DraggablePanel> {
 
 
+  double _defaultTopPadding = 0;
   double _containerWidth;
   double _containerHeight;
   double _minWidth;
@@ -89,7 +91,7 @@ class DraggableState extends State<DraggablePanel> {
   }
 
   resetAttributes({bool notifyStateChange = false}) {
-    _top = 0;
+    _top = _defaultTopPadding;
     _containerWidth = screenSize.width;
     _containerHeight = widget.topChildHeight;
     _right = 0;
@@ -232,8 +234,8 @@ class DraggableState extends State<DraggablePanel> {
                     _scale = _containerHeight / widget.topChildHeight;
                   }
 
-                  if (_top < 0) {
-                    _top = 0;
+                  if (_top < _defaultTopPadding) {
+                    _top = _defaultTopPadding;
                   } else if (_top + widget.topChildHeight >= (screenSize.height)) {
                     _top = screenSize.height - widget.topChildHeight;
                     _isMinimised = true;
@@ -284,7 +286,7 @@ class DraggableState extends State<DraggablePanel> {
   }
 
   _dragUp() {
-    _top = 0;
+    _top = _defaultTopPadding;
     _containerWidth = screenSize.width;
     _containerHeight = widget.topChildHeight;
     _right = 0;
@@ -331,6 +333,15 @@ class DraggableState extends State<DraggablePanel> {
   _init() {
     if (screenSize == null) {
       screenSize = MediaQuery.of(context).size;
+      if (widget.defaultTopPadding == null) {
+        _defaultTopPadding = MediaQuery
+            .of(context)
+            .padding
+            .top;
+      } else {
+        _defaultTopPadding = widget.defaultTopPadding;
+      }
+      _top = _defaultTopPadding;
       _containerHeight = widget.topChildHeight;
       _containerWidth = screenSize.width;
       _minWidth = widget.scale ? (_containerWidth * widget.scaleBy) : widget.topChildDockWidth;
