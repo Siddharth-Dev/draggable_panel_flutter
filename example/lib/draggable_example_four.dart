@@ -1,6 +1,5 @@
 import 'dart:io';
-
-import 'package:draggable_panel_flutter/draggable_panel_flutter_with_parent.dart';
+import 'package:draggable_panel_flutter/draggable_panel_flutter.dart';
 import 'package:flutter/material.dart';
 
 class DraggableExampleFour extends StatefulWidget {
@@ -19,7 +18,7 @@ class DraggableExampleState extends State<DraggableExampleFour> {
 
     return WillPopScope(
       onWillPop: onBackPressed,
-      child: DraggablePanelWithParent(
+      child: DraggablePanel(
         key: _globalKey,
         parent: Scaffold(
           appBar: AppBar(

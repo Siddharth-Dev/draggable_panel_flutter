@@ -1,5 +1,4 @@
 import 'package:draggable_panel_flutter_example/draggable_example_four.dart';
-import 'package:draggable_panel_flutter_example/draggable_same_stack_example.dart';
 import 'package:draggable_panel_flutter_example/draggable_same_stack_ignore_pointer.dart';
 import 'package:flutter/material.dart';
 
@@ -44,13 +43,11 @@ class ExampleApp extends StatelessWidget {
             _pushNewScreen(context, DraggableExampleOne());
           }),
           SizedBox(height: 10,),
-          _getButton("Same Stack exapme", (){
-            _pushNewScreen(context, DraggableExampleTwo());
-          }),
-          SizedBox(height: 10,),_getButton("Ignore Pointer Example", (){
+          _getButton("Ignore Pointer Example", (){
             _pushNewScreen(context, DraggableExampleThree());
           }),
-          SizedBox(height: 10,),_getButton("Parent passed to draggable panel", (){
+          SizedBox(height: 10,)
+          ,_getButton("Parent passed to draggable panel", (){
             _pushNewScreen(context, DraggableExampleFour());
           }),
           SizedBox(height: 10,),

@@ -5,6 +5,7 @@ import 'drag_listener.dart';
 
 class DraggablePanel extends StatefulWidget {
 
+  final Widget parent;
   final Widget topChild;
   final Widget bottomChild;
   final double topChildHeight;
@@ -13,9 +14,10 @@ class DraggablePanel extends StatefulWidget {
   final bool scale;
   final double scaleBy;
   final bool defaultShow;
+  final Color backgroundColor;
   final DragListener listener;
 
-  DraggablePanel({Key key, @required this.topChild, @required this.bottomChild, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.scale = true, this.scaleBy = .75, this.listener, this.defaultShow = true}): super(key: key) {
+  DraggablePanel({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.scale = true, this.scaleBy = .75, this.listener, this.defaultShow = true, this.backgroundColor = Colors.transparent}): super(key: key) {
     assert(topChild != null);
     assert(bottomChild != null);
   }
@@ -43,8 +45,19 @@ class DraggableState extends State<DraggablePanel> {
   Size screenSize;
   double _upperLimit, _lowerLimit;
   double _scale = 1;
+  List<Widget> _backWidgets = List();
 
   DraggableState(this._hide);
+
+  addWidgetInBetween(Widget widget) {
+    _backWidgets.add(widget);
+    setState(() {});
+  }
+
+  removeWidget(Widget widget) {
+    _backWidgets.remove(widget);
+    setState(() {});
+  }
 
   show({bool reset = false}) {
     if (reset) {
@@ -65,6 +78,8 @@ class DraggableState extends State<DraggablePanel> {
 
   bool isMaximised() => !_isMinimised;
 
+  bool isShown() => !_hide;
+
   minimise() {
     _dragDown();
   }
@@ -72,8 +87,6 @@ class DraggableState extends State<DraggablePanel> {
   maximise() {
     _dragUp();
   }
-
-  bool isShown() => !_hide;
 
   resetAttributes({bool notifyStateChange = false}) {
     _top = 0;
@@ -94,161 +107,164 @@ class DraggableState extends State<DraggablePanel> {
   Widget build(BuildContext context) {
     _init();
     return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: _hide
-            ? Container()
-            : Stack(
-          children: <Widget>[
-            AnimatedPositioned(
-              duration: Duration(milliseconds: animationD),
-              top: _top,
-              left: _left,
-              right: _right,
-              onEnd: () {
-                if (isMinimised() && _pop) {
-                  if (widget.listener != null) {
-                    widget.listener.onExit(context);
+      backgroundColor: widget.backgroundColor,
+      body: Stack(
+        children: <Widget>[
+          if (widget.parent != null)
+            widget.parent,
+          for (int i=0;i<_backWidgets.length;i++)
+            _backWidgets[i],
+          _hide ? Container() : AnimatedPositioned(
+            duration: Duration(milliseconds: animationD),
+            top: _top,
+            left: _left,
+            right: _right,
+            onEnd: () {
+              if (isMinimised() && _pop) {
+                print("Finished");
+                if (widget.listener != null) {
+                  widget.listener.onExit(context);
+                } else {
+                  hide();
+                }
+              }
+            },
+            child: GestureDetector(
+
+              onTap: () {
+                if (_isMinimised) {
+                  animationD = 500;
+                  _dragUp();
+                }
+              },
+
+              onHorizontalDragEnd: (detail){
+                bool isHorizontal = detail.primaryVelocity < 0;
+                double velocity = detail.primaryVelocity < 0 ? -detail.primaryVelocity : detail.primaryVelocity;
+                if (_isMinimised) {
+                  if (velocity > 800) {
+                    animationD = 500;
+                    if (isHorizontal) {
+                      _dragLeft();
+                    } else {
+                      _dragRight();
+                    }
                   } else {
-                    hide();
+                    animationD = 300;
+                    _dockPosition();
                   }
                 }
               },
-              child: GestureDetector(
 
-                onTap: () {
-                  if (_isMinimised) {
+
+              onHorizontalDragUpdate: (detail) {
+
+                if (_isMinimised){
+                  animationD = 300;
+                  _horizontalDrag = detail.primaryDelta;
+                  print("Primary Delta ${detail.primaryDelta}");
+                  print("Dx ${detail.delta.dx}");
+
+                  _left = _left + _horizontalDrag;
+                  _right = _right - _horizontalDrag;
+                  setState(() {
+
+                  });
+                }
+
+              },
+
+              onVerticalDragEnd: (detail){
+                if (!_isMinimised) {
+                  if (detail.primaryVelocity > 600) {
+                    animationD = 500;
+                    _dragDown();
+                  } else if (_top < screenSize.height / 3) {
                     animationD = 500;
                     _dragUp();
+                  } else {
+                    animationD = 500;
+                    _dragDown();
                   }
-                },
+                }
+              },
 
-                onHorizontalDragEnd: (detail){
-                  bool isHorizontal = detail.primaryVelocity < 0;
-                  double velocity = detail.primaryVelocity < 0 ? -detail.primaryVelocity : detail.primaryVelocity;
-                  if (_isMinimised) {
-                    if (velocity > 800) {
-                      animationD = 500;
-                      if (isHorizontal) {
-                        _dragLeft();
+              onVerticalDragUpdate: (detail){
+
+                if (!_isMinimised) {
+                  _pop = false;
+                  animationD = 200;
+                  _top = _top + detail.primaryDelta;
+                  bool isUp = detail.primaryDelta < 0;
+
+                  if (isUp) {
+                    if (_containerHeight < widget.topChildHeight ||
+                        _containerWidth < screenSize.width) {
+                      _containerHeight++;
+                      _containerWidth++;
+                      if (_containerHeight >= widget.topChildHeight) {
+                        _containerHeight = widget.topChildHeight;
+                      }
+
+                      if (_containerWidth >= screenSize.width) {
+                        _containerWidth = screenSize.width;
                       } else {
-                        _dragRight();
+                        _left--;
                       }
+                    }
+
+                  } else if (_top + widget.topChildHeight >= _upperLimit &&
+                      _top + widget.topChildHeight <= _lowerLimit) {
+                    _containerHeight--;
+                    _containerWidth--;
+                    if (_containerHeight <= _minHeight) {
+                      _containerHeight = _minHeight;
+                    }
+
+                    if (_containerWidth <= _minWidth) {
+                      _containerWidth = _minWidth;
                     } else {
-                      animationD = 300;
-                      _dockPosition();
-                    }
-                  }
-                },
-
-
-                onHorizontalDragUpdate: (detail) {
-
-                  if (_isMinimised){
-                    animationD = 300;
-                    _horizontalDrag = detail.primaryDelta;
-                    print("Primary Delta ${detail.primaryDelta}");
-                    print("Dx ${detail.delta.dx}");
-
-                    _left = _left + _horizontalDrag;
-                    _right = _right - _horizontalDrag;
-                    setState(() {
-
-                    });
-                  }
-
-                },
-
-                onVerticalDragEnd: (detail){
-                  if (!_isMinimised) {
-                    if (detail.primaryVelocity > 600) {
-                      animationD = 500;
-                      _dragDown();
-                    } else if (_top < screenSize.height / 3) {
-                      animationD = 500;
-                      _dragUp();
-                    } else {
-                      animationD = 500;
-                      _dragDown();
-                    }
-                  }
-                },
-
-                onVerticalDragUpdate: (detail){
-
-                  if (!_isMinimised) {
-                    _pop = false;
-                    animationD = 200;
-                    _top = _top + detail.primaryDelta;
-                    bool isUp = detail.primaryDelta < 0;
-
-                    if (isUp) {
-                      if (_containerHeight < widget.topChildHeight ||
-                          _containerWidth < screenSize.width) {
-                        _containerHeight++;
-                        _containerWidth++;
-                        if (_containerHeight >= widget.topChildHeight) {
-                          _containerHeight = widget.topChildHeight;
-                        }
-
-                        if (_containerWidth >= screenSize.width) {
-                          _containerWidth = screenSize.width;
-                        } else {
-                          _left--;
-                        }
-                      }
-
-                    } else if (_top + widget.topChildHeight >= _upperLimit &&
-                        _top + widget.topChildHeight <= _lowerLimit) {
-                      _containerHeight--;
-                      _containerWidth--;
-                      if (_containerHeight <= _minHeight) {
-                        _containerHeight = _minHeight;
-                      }
-
-                      if (_containerWidth <= _minWidth) {
-                        _containerWidth = _minWidth;
-                      } else {
-                        _left++;
-                      }
-                    }
-
-                    if (widget.scale) {
-                      _scale = _containerHeight / widget.topChildHeight;
-                    }
-
-                    if (_top < 0) {
-                      _top = 0;
-                    } else if (_top + widget.topChildHeight >= (screenSize.height)) {
-                      _top = screenSize.height - widget.topChildHeight;
-                      _isMinimised = true;
+                      _left++;
                     }
                   }
 
-                  setState(() {
-                  });
-                },
-                child: Transform.scale(
-                  scale: _scale,
-                  alignment: Alignment.topRight,
-                  child: Container(
-                      width: widget.scale ? screenSize.width : _containerWidth,
-                      height: widget.scale ? widget.topChildHeight : _containerHeight,
-                      child: AbsorbPointer(
-                          absorbing: _isMinimised,
-                          child: widget.topChild)),
-                ),
+                  if (widget.scale) {
+                    _scale = _containerHeight / widget.topChildHeight;
+                  }
+
+                  if (_top < 0) {
+                    _top = 0;
+                  } else if (_top + widget.topChildHeight >= (screenSize.height)) {
+                    _top = screenSize.height - widget.topChildHeight;
+                    _isMinimised = true;
+                  }
+                }
+
+                setState(() {
+                });
+              },
+              child: Transform.scale(
+                scale: _scale,
+                alignment: Alignment.topRight,
+                child: Container(
+                    width: widget.scale ? screenSize.width : _containerWidth,
+                    height: widget.scale ? widget.topChildHeight : _containerHeight,
+                    child: AbsorbPointer(
+                        absorbing: _isMinimised,
+                        child: widget.topChild)),
               ),
             ),
-            AnimatedPositioned(
-              duration: Duration(milliseconds: animationD),
-              left: 0,
-              top: (_top + widget.topChildHeight),
-              height: screenSize.height - widget.topChildHeight,
-              width: screenSize.width,
-              child: widget.bottomChild,
-            )
-          ],
-        )
+          ),
+          _hide ? Container() : AnimatedPositioned(
+            duration: Duration(milliseconds: animationD),
+            left: 0,
+            top: (_top + widget.topChildHeight),
+            height: screenSize.height - widget.topChildHeight,
+            width: screenSize.width,
+            child: widget.bottomChild,
+          )
+        ],
+      ),
     );
   }
 
