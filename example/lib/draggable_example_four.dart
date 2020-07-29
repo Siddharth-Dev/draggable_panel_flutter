@@ -69,6 +69,7 @@ class DraggableExampleState extends State<DraggableExampleFour> {
         topChild:   Container(color: Colors.blue, alignment: Alignment.center, child: Icon(Icons.feedback, size: 80,),),
         bottomChild: Container(color: Colors.red,),
         defaultShow: false,
+        topChildDockHeight: 140,
 //        defaultTopPadding: 100,
       ),
     );
