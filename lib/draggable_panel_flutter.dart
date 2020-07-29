@@ -46,7 +46,10 @@ class DraggableState extends State<DraggablePanel> {
 
   DraggableState(this._hide);
 
-  show() {
+  show({bool rest}) {
+    if (rest) {
+      restAttributes();
+    }
     setState(() {
       _hide = false;
     });
@@ -70,6 +73,18 @@ class DraggableState extends State<DraggablePanel> {
     _dragUp();
   }
 
+  restAttributes() {
+    _top = 0;
+    _containerWidth = screenSize.width;
+    _containerHeight = widget.topChildHeight;
+    _right = 0;
+    _left = 0;
+    _isMinimised = false;
+    widget.listener?.onMaximised();
+    _horizontalDrag = 0;
+    _scale = 1;
+  }
+
   @override
   Widget build(BuildContext context) {
     _init();
@@ -87,7 +102,7 @@ class DraggableState extends State<DraggablePanel> {
               onEnd: () {
                 if (isMinimised() && _pop) {
                   if (widget.listener != null) {
-                    widget.listener.onExit();
+                    widget.listener.onExit(context);
                   } else {
                     hide();
                   }

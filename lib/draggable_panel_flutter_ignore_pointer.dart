@@ -89,7 +89,7 @@ class DraggableState extends State<DraggablePanelIgnorePointer> {
                 onEnd: () {
                   if (isMinimised() && _pop) {
                     if (widget.listener != null) {
-                      widget.listener.onExit();
+                      widget.listener.onExit(context);
                     } else {
                       hide();
                     }
