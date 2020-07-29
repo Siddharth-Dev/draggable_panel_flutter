@@ -3,7 +3,7 @@ Plugin to replicate the DraggablePanel functionality as in Draggable panel in An
 When the top widget is dragged to bottom it is scaled down to minimum width and height passed to the widget
 
 ### Demo
-1) Draggable Panel
+1) Draggable Panel<br>
 ![Draggable Panel demo](./gif1.gif)
 2) Opening a widget between Parent and Panel (draggable_example_four.dart)
 ![Draggable Panel demo](./gif2.gif)
