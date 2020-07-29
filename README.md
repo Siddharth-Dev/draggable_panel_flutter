@@ -5,7 +5,7 @@ When the top widget is dragged to bottom it is scaled down to minimum width and 
 ### Demo
 1) Draggable Panel<br><br>
 ![Draggable Panel demo](./gif1.gif)<br><br>
-2) Opening a widget between Parent and Panel (draggable_example_four.dart)<br>
+2) Opening a widget between Parent and Panel (draggable_example_four.dart)<br><br>
 ![Draggable Panel demo](./gif2.gif)
 
 ### Code
