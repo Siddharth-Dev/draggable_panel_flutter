@@ -2,8 +2,7 @@
 
 Plugin to replicate the DraggablePanel functionality as in Draggable panel in Android.
 
-When the top widget is dragged to bottom it is scaled down using the scale factor.
-You can choose to either go by Scale or go with minWidth & minHeight.
+When the top widget is dragged to bottom it is scaled down to minimum width and height passed to the widget
 
 ### Code
 Main class DraggablePanel
@@ -70,12 +69,10 @@ You can use this context to either pop the widget or you can call hide & reset m
 Other properties of the DraggablePanel-
   - parent: Parent Widget, widget that you want to place behind the DraggablePanel. Only available in DraggablePanelWithParent class.
   - topChild: The widget you want to show at top of panel
-  - bottomChild: The widget you want to show after top widget, that covers the remainig panel area.
-  - scale: Whether to use the scale factor when reducing the top widget on dragging
-  - scaleBy: The factor by which the scale is done (default is .75)
-  - topChildHeight: The height of the top widget
-  - topChildDockWidth: The width when the top widget is dragged down
-  - topChildDockHeight: The height when the top widget is dragged down
+  - bottomChild: The widget you want to show after top widget, that covers the remaining panel area.
+  - topChildHeight: The height of the top widget (section)
+  - topChildDockWidth(minimum Width): The width when the top widget is dragged down to dock state
+  - topChildDockHeight(minimum height): The height when the top widget is dragged down to dock state
   - listener: Listener to get callback when the panel is Dragged, minimised, maximised
   - defaultShow: Initial state of panel show/hide
 
