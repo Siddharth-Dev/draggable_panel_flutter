@@ -6,15 +6,10 @@ When the top widget is dragged to bottom it is scaled down using the scale facto
 You can choose to either go by Scale or go with minWidth & minHeight.
 
 ### Code
-Two main class 1) DraggablePanel 2) DraggablePanelWithParent
+Main class DraggablePanel
 ```
 DraggablePanel(
-  topChild: Container(color: Colors.blue, alignment: Alignment.center, child: Icon(Icons.filter, size: 50,),),
-  bottomChild: Container(color:  Colors.red,),)
-```
-```
-DraggablePanelWithParent(
-parent: Container(color: Colors.grey)
+parent: Container(color: Colors.grey) // optional, this will as the back widget(behind panel)
 topChild: Container(color: Colors.blue, alignment: Alignment.center, child: Icon(Icons.filter, size: 50,),),
 bottomChild: Container(color:  Colors.red,),)
 ```
@@ -27,13 +22,15 @@ Navigator.of(context).push(TransparentRoute(
   )
 ));
 ```
-2) If you want to touch the back stack widget when the panel is minimized, use-
+2) If you want to touch the back stack widget when the panel is minimized, pass the parent widget-
 ```
-DraggablePanelWithParent(
+DraggablePanel(
   parent: Container(color:  Colors.grey,)
   topChild: Container(color: Colors.blue, alignment: Alignment.center, child: Icon(Icons.filter, size: 50,),),
   bottomChild: Container(color:  Colors.red,),)
 ```
+### Check "Parent passed to draggable panel" example (draggable_example_four.dart) for proper implementation
+
 With above you will be able to touch parent container and can perform action on the same.
 You can also perform operation like show/hide panel, add widgets in between Parent and Panel by accessing the panel state:
 ```
@@ -69,7 +66,6 @@ onDrag(double dragPosition); // When panel is being dragged
 onExit(BuildContext context); // When panel is dragged away either horizontally left or right
 You can use this context to either pop the widget or you can call hide & reset method to hide the panel and resetting its state to give exit illusion.
 ```
-### Check "Parent passed to draggable panel" example (draggable_example_four.dart) for proper implementation
 
 Other properties of the DraggablePanel-
   - parent: Parent Widget, widget that you want to place behind the DraggablePanel. Only available in DraggablePanelWithParent class.
