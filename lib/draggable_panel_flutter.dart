@@ -330,7 +330,7 @@ class DraggableState extends State<DraggablePanel> {
             duration: Duration(milliseconds: animationD),
             left: 0,
             top: _isFullScreen || _hide ? screenSize.height : (_top + widget.topChildHeight),
-            height: _hide ? 0 : screenSize.height - widget.topChildHeight,
+            height: screenSize.height - widget.topChildHeight,
             width: screenSize.width,
             child: widget.bottomChild,
           )
