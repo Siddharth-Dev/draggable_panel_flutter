@@ -129,6 +129,7 @@ class DraggableState extends State<DraggablePanel> {
   }
 
   resetAttributes({bool notifyStateChange = false}) {
+    _pop = false;
     _top = _defaultTopPadding;
     _containerWidth = screenSize.width;
     _containerHeight = widget.topChildHeight;
@@ -149,192 +150,195 @@ class DraggableState extends State<DraggablePanel> {
     _init();
     return Scaffold(
       backgroundColor: widget.backgroundColor,
-      body: Stack(
-        children: <Widget>[
-          if (widget.parent != null)
-            widget.parent,
-          for (int i=0;i<_backWidgets.length;i++)
-            _backWidgets[i],
-          _hide ? Container() : AnimatedPositioned(
-            duration: Duration(milliseconds: animationD),
-            top: _top,
-            left: _left,
-            right: _right,
-            onEnd: () {
-              if (isMinimised() && _pop) {
-                print("Finished");
-                if (widget.listener != null) {
-                  widget.listener.onExit(context);
-                } else {
-                  hide();
+      body: Visibility(
+        visible: !_hide,
+        child: Stack(
+          children: <Widget>[
+            if (widget.parent != null)
+              widget.parent,
+            for (int i=0;i<_backWidgets.length;i++)
+              _backWidgets[i],
+            AnimatedPositioned(
+              duration: Duration(milliseconds: animationD),
+              top: _top,
+              left: _left,
+              right: _right,
+              onEnd: () {
+                if (isMinimised() && _pop) {
+                  print("Finished");
+                  if (widget.listener != null) {
+                    widget.listener.onExit(context);
+                  } else {
+                    hide();
+                  }
                 }
-              }
-            },
-            child: GestureDetector(
+              },
+              child: GestureDetector(
 
-                onTap: () {
-                  if (_isMinimised) {
-                    animationD = 500;
-                    _dragUp();
-                  }
-                },
-
-                onHorizontalDragEnd: (detail){
-                  if (_isFullScreen) {
-                    return;
-                  }
-                  bool isHorizontal = detail.primaryVelocity < 0;
-                  double velocity = detail.primaryVelocity < 0 ? -detail.primaryVelocity : detail.primaryVelocity;
-                  if (_isMinimised) {
-                    if (velocity > 800) {
-                      animationD = 500;
-                      if (isHorizontal) {
-                        _dragLeft();
-                      } else {
-                        _dragRight();
-                      }
-                    } else {
-                      animationD = 300;
-                      _dockPosition();
-                    }
-                  }
-                },
-
-
-                onHorizontalDragUpdate: (detail) {
-                  if (_isFullScreen) {
-                    return;
-                  }
-                  if (_isMinimised){
-                    animationD = 300;
-                    _horizontalDrag = detail.primaryDelta;
-                    print("Primary Delta ${detail.primaryDelta}");
-                    print("Dx ${detail.delta.dx}");
-
-                    _left = _left + _horizontalDrag;
-                    _right = _right - _horizontalDrag;
-                    setState(() {
-
-                    });
-                  }
-
-                },
-
-                onVerticalDragEnd: (detail){
-                  _verticalDragging = false;
-                  if (_isFullScreen) {
-                    return;
-                  }
-                  if (!_isMinimised) {
-                    if (detail.primaryVelocity > 600) {
-                      animationD = 500;
-                      _dragDown();
-                    } else if (_top < screenSize.height / 3) {
+                  onTap: () {
+                    if (_isMinimised) {
                       animationD = 500;
                       _dragUp();
-                    } else {
-                      animationD = 500;
-                      _dragDown();
                     }
-                  }
-                },
-                onVerticalDragCancel: () {
-                  _verticalDragging = false;
-                },
-                onVerticalDragDown: (detail) {
-                  if (_isFullScreen) {
-                    _verticalDragging = true;
-                  }
-                },
+                  },
 
-                onVerticalDragUpdate: (detail){
-
-                  if (_isFullScreen) {
-                    return;
-                  }
-                  if (!_isMinimised) {
-                    _pop = false;
-                    animationD = 200;
-                    _top = _top + detail.primaryDelta;
-                    bool isUp = detail.primaryDelta < 0;
-
-                    if (isUp) {
-                      if (_containerHeight < widget.topChildHeight ||
-                          _containerWidth < screenSize.width) {
-                        _containerHeight++;
-                        _containerWidth++;
-                        if (_containerHeight >= widget.topChildHeight) {
-                          _containerHeight = widget.topChildHeight;
-                        }
-
-                        if (_containerWidth >= screenSize.width) {
-                          _containerWidth = screenSize.width;
+                  onHorizontalDragEnd: (detail){
+                    if (_isFullScreen) {
+                      return;
+                    }
+                    bool isHorizontal = detail.primaryVelocity < 0;
+                    double velocity = detail.primaryVelocity < 0 ? -detail.primaryVelocity : detail.primaryVelocity;
+                    if (_isMinimised) {
+                      if (velocity > 800) {
+                        animationD = 500;
+                        if (isHorizontal) {
+                          _dragLeft();
                         } else {
-                          _left--;
+                          _dragRight();
                         }
-                      }
-
-                    } else if (_top + widget.topChildHeight >= _upperLimit
-                        && _top + widget.topChildHeight <= _lowerLimit) {
-                      _containerHeight--;
-                      _containerWidth--;
-                      if (_containerHeight <= _minHeight) {
-                        _containerHeight = _minHeight;
-                      }
-
-                      if (_containerWidth <= _minWidth) {
-                        _containerWidth = _minWidth;
                       } else {
-                        _left++;
+                        animationD = 300;
+                        _dockPosition();
+                      }
+                    }
+                  },
+
+
+                  onHorizontalDragUpdate: (detail) {
+                    if (_isFullScreen) {
+                      return;
+                    }
+                    if (_isMinimised){
+                      animationD = 300;
+                      _horizontalDrag = detail.primaryDelta;
+                      print("Primary Delta ${detail.primaryDelta}");
+                      print("Dx ${detail.delta.dx}");
+
+                      _left = _left + _horizontalDrag;
+                      _right = _right - _horizontalDrag;
+                      setState(() {
+
+                      });
+                    }
+
+                  },
+
+                  onVerticalDragEnd: (detail){
+                    _verticalDragging = false;
+                    if (_isFullScreen) {
+                      return;
+                    }
+                    if (!_isMinimised) {
+                      if (detail.primaryVelocity > 600) {
+                        animationD = 500;
+                        _dragDown();
+                      } else if (_top < screenSize.height / 3) {
+                        animationD = 500;
+                        _dragUp();
+                      } else {
+                        animationD = 500;
+                        _dragDown();
+                      }
+                    }
+                  },
+                  onVerticalDragCancel: () {
+                    _verticalDragging = false;
+                  },
+                  onVerticalDragDown: (detail) {
+                    if (_isFullScreen) {
+                      _verticalDragging = true;
+                    }
+                  },
+
+                  onVerticalDragUpdate: (detail){
+
+                    if (_isFullScreen) {
+                      return;
+                    }
+                    if (!_isMinimised) {
+                      _pop = false;
+                      animationD = 200;
+                      _top = _top + detail.primaryDelta;
+                      bool isUp = detail.primaryDelta < 0;
+
+                      if (isUp) {
+                        if (_containerHeight < widget.topChildHeight ||
+                            _containerWidth < screenSize.width) {
+                          _containerHeight++;
+                          _containerWidth++;
+                          if (_containerHeight >= widget.topChildHeight) {
+                            _containerHeight = widget.topChildHeight;
+                          }
+
+                          if (_containerWidth >= screenSize.width) {
+                            _containerWidth = screenSize.width;
+                          } else {
+                            _left--;
+                          }
+                        }
+
+                      } else if (_top + widget.topChildHeight >= _upperLimit
+                          && _top + widget.topChildHeight <= _lowerLimit) {
+                        _containerHeight--;
+                        _containerWidth--;
+                        if (_containerHeight <= _minHeight) {
+                          _containerHeight = _minHeight;
+                        }
+
+                        if (_containerWidth <= _minWidth) {
+                          _containerWidth = _minWidth;
+                        } else {
+                          _left++;
+                        }
+
                       }
 
+
+                      if (_top < _defaultTopPadding) {
+                        _top = _defaultTopPadding;
+                      } else if (_top + widget.topChildHeight >= (screenSize.height)) {
+                        _top = screenSize.height - widget.topChildHeight;
+                        _isMinimised = true;
+                      }
+
+                      _scaleX = _containerWidth / screenSize.width;
+                      _scaleY = _containerHeight / widget.topChildHeight;
+
+                      if (isUp) {
+                        _scaleX = _scaleX > 1 ? 1 : _scaleX;
+                        _scaleY = _scaleY > 1 ? 1 : _scaleY;
+                      } else {
+                        _scaleX = _scaleX < _minScaleX ? _minScaleX : _scaleX;
+                        _scaleY = _scaleY < _minScaleY ? _minScaleY : _scaleY;
+                      }
                     }
 
-
-                    if (_top < _defaultTopPadding) {
-                      _top = _defaultTopPadding;
-                    } else if (_top + widget.topChildHeight >= (screenSize.height)) {
-                      _top = screenSize.height - widget.topChildHeight;
-                      _isMinimised = true;
-                    }
-
-                    _scaleX = _containerWidth / screenSize.width;
-                    _scaleY = _containerHeight / widget.topChildHeight;
-
-                    if (isUp) {
-                      _scaleX = _scaleX > 1 ? 1 : _scaleX;
-                      _scaleY = _scaleY > 1 ? 1 : _scaleY;
-                    } else {
-                      _scaleX = _scaleX < _minScaleX ? _minScaleX : _scaleX;
-                      _scaleY = _scaleY < _minScaleY ? _minScaleY : _scaleY;
-                    }
-                  }
-
-                  setState(() {
-                  });
-                },
-                child: Transform(
-                  transform: Matrix4.diagonal3Values(_scaleX, _scaleY, 1),
-                  alignment: Alignment.topRight,
-                  child: Container(
-                    width: screenSize.width,
-                    height: _isFullScreen ?  screenSize.height : widget.topChildHeight,
-                    child: AbsorbPointer(
-                        absorbing: _isMinimised,
-                        child: widget.topChild),
-                  ),
-                )
+                    setState(() {
+                    });
+                  },
+                  child: Transform(
+                    transform: Matrix4.diagonal3Values(_scaleX, _scaleY, 1),
+                    alignment: Alignment.topRight,
+                    child: Container(
+                      width: screenSize.width,
+                      height: _isFullScreen ?  screenSize.height : widget.topChildHeight,
+                      child: AbsorbPointer(
+                          absorbing: _isMinimised,
+                          child: widget.topChild),
+                    ),
+                  )
+              ),
             ),
-          ),
-          _hide || _isFullScreen ? Container() : AnimatedPositioned(
-            duration: Duration(milliseconds: animationD),
-            left: 0,
-            top: (_top + widget.topChildHeight),
-            height: screenSize.height - widget.topChildHeight,
-            width: screenSize.width,
-            child: widget.bottomChild,
-          )
-        ],
+            AnimatedPositioned(
+              duration: Duration(milliseconds: animationD),
+              left: 0,
+              top: _isFullScreen ? screenSize.height : (_top + widget.topChildHeight),
+              height: screenSize.height - widget.topChildHeight,
+              width: screenSize.width,
+              child: widget.bottomChild,
+            )
+          ],
+        ),
       ),
     );
   }
