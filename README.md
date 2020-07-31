@@ -60,11 +60,15 @@ _globalKey.currentState.minimise(); // to minimise the panel
 
 // to reset the panel values, optionally notify this state change to widget
 _globalKey.currentState.resetAttributes({notifyStateChange: bool});
+
+// To make panel full screen
+_globalKey.currentState.fullScreen();
 ```
 If you pass the DragListener to the widget then you can listen for the state change
 ```
 onMinimised(); // When panel minimised
 onMaximised(); // When panel maximised
+onFullScreen(); // When panel is in fullscreen mode
 onDrag(double dragPosition); // When panel is being dragged
 onExit(BuildContext context); // When panel is dragged away either horizontally left or right
 You can use this context to either pop the widget or you can call hide & reset method to hide the panel and resetting its state to give exit illusion.
