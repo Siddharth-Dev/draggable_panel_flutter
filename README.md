@@ -83,5 +83,6 @@ Other properties of the DraggablePanel-
   - topChildDockHeight(minimum height): The height when the top widget is dragged down to dock state
   - listener: Listener to get callback when the panel is Dragged, minimised, maximised
   - defaultShow: Initial state of panel show/hide
+  - dockStateBottomMargin: Bottom margin for dock state
 
 ### Note: As you can see we have to place every widget inside same stack to access the touch event from panel when minimised. I am looking for something which may allow us to pass touch events to back widget without placing them in same stack. In case you find anything let me know.
