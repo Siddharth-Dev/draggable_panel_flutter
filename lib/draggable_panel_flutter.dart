@@ -56,7 +56,8 @@ class DraggableState extends State<DraggablePanel> {
   bool _isOrientationChanged = false;
   List<Widget> _backWidgets = List();
   Timer _debounce;
-  bool _forceLadscape = false;
+  bool _forceLandscape = false;
+  bool _verticalDragging = false;
 
   DraggableState(this._hide);
 
@@ -102,7 +103,7 @@ class DraggableState extends State<DraggablePanel> {
   setFullScreen() {
     print("Full screen called");
     _fullScreen();
-    _forceLadscape = true;
+    _forceLandscape = true;
     OrientationUtils.setLandscapeModeAll();
     setState(() {});
   }
@@ -220,6 +221,7 @@ class DraggableState extends State<DraggablePanel> {
                 },
 
                 onVerticalDragEnd: (detail){
+                  _verticalDragging = false;
                   if (_isFullScreen) {
                     return;
                   }
@@ -234,6 +236,14 @@ class DraggableState extends State<DraggablePanel> {
                       animationD = 500;
                       _dragDown();
                     }
+                  }
+                },
+                onVerticalDragCancel: () {
+                  _verticalDragging = false;
+                },
+                onVerticalDragDown: (detail) {
+                  if (_isFullScreen) {
+                    _verticalDragging = true;
                   }
                 },
 
@@ -419,7 +429,7 @@ class DraggableState extends State<DraggablePanel> {
       _fullScreen();
     } else if (_isOrientationChanged) {
       _isFullScreen = false;
-      _forceLadscape = false;
+      _forceLandscape = false;
       _dragUp(changeState: false);
     }
     if (screenSize == null || _isOrientationChanged) {
@@ -451,9 +461,9 @@ class DraggableState extends State<DraggablePanel> {
     }
 
     _debounce = Timer(Duration(seconds: 1), () async {
-      if (_isMinimised) {
+      if (_isMinimised || _hide || _verticalDragging) {
         OrientationUtils.setPortraitModeAll();
-      } else if (_forceLadscape){
+      } else if (_forceLandscape){
         OrientationUtils.setLandscapeModeAll();
       } else {
         OrientationUtils.setAutoMode();
