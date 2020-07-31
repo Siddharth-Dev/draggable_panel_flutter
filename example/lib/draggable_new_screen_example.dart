@@ -47,5 +47,10 @@ class DraggableExampleOne extends StatelessWidget implements DragListener {
   onMinimised() {
   }
 
+  @override
+  onFullScreen() {
+  }
+
+
 
 }

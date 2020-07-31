@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:draggable_panel_flutter/orientation_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -48,7 +51,12 @@ class DraggableState extends State<DraggablePanel> {
   double _scaleX = 1;
   double _minScaleX;
   double _minScaleY;
+  bool _isFullScreen = false;
+  Orientation previousOrientation;
+  bool _isOrientationChanged = false;
   List<Widget> _backWidgets = List();
+  Timer _debounce;
+  bool _forceLadscape = false;
 
   DraggableState(this._hide);
 
@@ -89,6 +97,34 @@ class DraggableState extends State<DraggablePanel> {
 
   maximise() {
     _dragUp();
+  }
+
+  setFullScreen() {
+    print("Full screen called");
+    _fullScreen();
+    _forceLadscape = true;
+    OrientationUtils.setLandscapeModeAll();
+    setState(() {});
+  }
+
+  bool canHandleBack() {
+    return !_hide;
+  }
+
+  onBackPressed() {
+    if (_hide) {
+      return;
+    }
+    animationD = 400;
+    if (_isFullScreen) {
+      _dragUp();
+    } else if (!_isMinimised){
+      _dragDown();
+    } else {
+      _dragLeft();
+    }
+    _isFullScreen = false;
+    OrientationUtils.setPortraitModeAll();
   }
 
   resetAttributes({bool notifyStateChange = false}) {
@@ -143,6 +179,9 @@ class DraggableState extends State<DraggablePanel> {
                 },
 
                 onHorizontalDragEnd: (detail){
+                  if (_isFullScreen) {
+                    return;
+                  }
                   bool isHorizontal = detail.primaryVelocity < 0;
                   double velocity = detail.primaryVelocity < 0 ? -detail.primaryVelocity : detail.primaryVelocity;
                   if (_isMinimised) {
@@ -162,7 +201,9 @@ class DraggableState extends State<DraggablePanel> {
 
 
                 onHorizontalDragUpdate: (detail) {
-
+                  if (_isFullScreen) {
+                    return;
+                  }
                   if (_isMinimised){
                     animationD = 300;
                     _horizontalDrag = detail.primaryDelta;
@@ -179,6 +220,9 @@ class DraggableState extends State<DraggablePanel> {
                 },
 
                 onVerticalDragEnd: (detail){
+                  if (_isFullScreen) {
+                    return;
+                  }
                   if (!_isMinimised) {
                     if (detail.primaryVelocity > 600) {
                       animationD = 500;
@@ -195,6 +239,9 @@ class DraggableState extends State<DraggablePanel> {
 
                 onVerticalDragUpdate: (detail){
 
+                  if (_isFullScreen) {
+                    return;
+                  }
                   if (!_isMinimised) {
                     _pop = false;
                     animationD = 200;
@@ -217,8 +264,7 @@ class DraggableState extends State<DraggablePanel> {
                         }
                       }
 
-                    } else if (_top > screenSize.height / 3
-                        && _top + widget.topChildHeight >= _upperLimit
+                    } else if (_top + widget.topChildHeight >= _upperLimit
                         && _top + widget.topChildHeight <= _lowerLimit) {
                       _containerHeight--;
                       _containerWidth--;
@@ -262,7 +308,7 @@ class DraggableState extends State<DraggablePanel> {
                   alignment: Alignment.topRight,
                   child: Container(
                     width: screenSize.width,
-                    height: widget.topChildHeight,
+                    height: _isFullScreen ?  screenSize.height : widget.topChildHeight,
                     child: AbsorbPointer(
                         absorbing: _isMinimised,
                         child: widget.topChild),
@@ -270,7 +316,7 @@ class DraggableState extends State<DraggablePanel> {
                 )
             ),
           ),
-          _hide ? Container() : AnimatedPositioned(
+          _hide || _isFullScreen ? Container() : AnimatedPositioned(
             duration: Duration(milliseconds: animationD),
             left: 0,
             top: (_top + widget.topChildHeight),
@@ -283,7 +329,21 @@ class DraggableState extends State<DraggablePanel> {
     );
   }
 
-  _dragDown() {
+  _fullScreen() {
+    _isFullScreen = true;
+    _top = _defaultTopPadding;
+    _containerWidth = screenSize.width;
+    _containerHeight = screenSize.height;
+    _right = 0;
+    _left = 0;
+    _isMinimised = false;
+    widget.listener?.onFullScreen();
+    _horizontalDrag = 0;
+    _scaleY = 1;
+    _scaleX = 1;
+  }
+
+  _dragDown({bool changeState = true}) {
     _top = screenSize.height - widget.topChildHeight;
     _containerWidth = _minWidth;
     _containerHeight = _minHeight;
@@ -294,12 +354,14 @@ class DraggableState extends State<DraggablePanel> {
     _scaleY = _minScaleY;
     _scaleX = _minScaleX;
     widget.listener?.onMinimised();
-    setState(() {
+    if (changeState) {
+      setState(() {
 
-    });
+      });
+    }
   }
 
-  _dragUp() {
+  _dragUp({bool changeState = true}) {
     _top = _defaultTopPadding;
     _containerWidth = screenSize.width;
     _containerHeight = widget.topChildHeight;
@@ -310,19 +372,23 @@ class DraggableState extends State<DraggablePanel> {
     _horizontalDrag = 0;
     _scaleY = 1;
     _scaleX = 1;
-    setState(() {
+    if (changeState) {
+      setState(() {
 
-    });
+      });
+    }
   }
 
-  _dragLeft() {
+  _dragLeft({bool changeState = true}) {
     _left = -_minWidth;
     _right = screenSize.width;
     _pop = true;
     _horizontalDrag = 0;
-    setState(() {
+    if (changeState) {
+      setState(() {
 
-    });
+      });
+    }
   }
 
   _dragRight() {
@@ -346,7 +412,18 @@ class DraggableState extends State<DraggablePanel> {
   }
 
   _init() {
-    if (screenSize == null) {
+    _afterBuildUpdate();
+    _isOrientationChanged = previousOrientation == null ? false : previousOrientation != MediaQuery.of(context).orientation;
+    previousOrientation = MediaQuery.of(context).orientation;
+    if (OrientationUtils.isLandscape(context)) {
+      _fullScreen();
+    } else if (_isOrientationChanged) {
+      _isFullScreen = false;
+      _forceLadscape = false;
+      _dragUp(changeState: false);
+    }
+    if (screenSize == null || _isOrientationChanged) {
+      print("screenSize changed");
       screenSize = MediaQuery.of(context).size;
       if (widget.defaultTopPadding == null) {
         _defaultTopPadding = MediaQuery
@@ -366,6 +443,22 @@ class DraggableState extends State<DraggablePanel> {
       _minScaleY = widget.topChildDockHeight / widget.topChildHeight;
       _minScaleX = widget.topChildDockWidth / screenSize.width;
     }
+  }
+
+  _afterBuildUpdate() {
+    if (_debounce?.isActive ?? false) {
+      _debounce.cancel();
+    }
+
+    _debounce = Timer(Duration(seconds: 1), () async {
+      if (_isMinimised) {
+        OrientationUtils.setPortraitModeAll();
+      } else if (_forceLadscape){
+        OrientationUtils.setLandscapeModeAll();
+      } else {
+        OrientationUtils.setAutoMode();
+      }
+    });
   }
 
 }

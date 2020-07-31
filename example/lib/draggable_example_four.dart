@@ -66,12 +66,24 @@ class DraggableExampleState extends State<DraggableExampleFour> {
             ],
           ),
         ),
-        topChild:   Container(color: Colors.blue, alignment: Alignment.center, child: Icon(Icons.feedback, size: 80,),),
+        topChild:   _getTopChild(),
         bottomChild: Container(color: Colors.red,),
         defaultShow: false,
         topChildDockHeight: 140,
 //        defaultTopPadding: 100,
       ),
+    );
+  }
+
+  Widget _getTopChild() {
+    return Container(
+      color: Colors.blue,
+      alignment: Alignment.center,
+      child: FlatButton(child: Text("Full Screen"),
+        color: Colors.grey,
+        onPressed: (){
+        _globalKey.currentState.setFullScreen();
+        },),
     );
   }
 
@@ -83,8 +95,8 @@ class DraggableExampleState extends State<DraggableExampleFour> {
       return false;
     }
 
-    if (_globalKey.currentState.isShown()) {
-      _globalKey.currentState.hide();
+    if (_globalKey.currentState.canHandleBack()) {
+      _globalKey.currentState.onBackPressed();
       return false;
     }
 
