@@ -60,30 +60,19 @@ class DraggableExampleState extends State<DraggableExampleFour> {
                 color: Colors.grey,
                 child: Text("Open Player"),
                 onPressed: (){
+                  _globalKey.currentState.resetAttributes();
                   _globalKey.currentState.show(reset: true);
                 },
               ),
             ],
           ),
         ),
-        topChild:   _getTopChild(),
+        topChild:  TopSectionWidget(_globalKey),
         bottomChild: Container(color: Colors.red,),
         defaultShow: false,
         topChildDockHeight: 140,
 //        defaultTopPadding: 100,
       ),
-    );
-  }
-
-  Widget _getTopChild() {
-    return Container(
-      color: Colors.blue,
-      alignment: Alignment.center,
-      child: FlatButton(child: Text("Full Screen"),
-        color: Colors.grey,
-        onPressed: (){
-        _globalKey.currentState.setFullScreen();
-        },),
     );
   }
 
@@ -106,6 +95,46 @@ class DraggableExampleState extends State<DraggableExampleFour> {
   _addWidgetsInBetween(Widget widget) {
     widgetsAdded.add(widget);
     _globalKey.currentState.addWidgetInBetween(widget);
+  }
+}
+
+class TopSectionWidget extends StatefulWidget {
+
+  final GlobalKey<DraggableState> _globalKey;
+
+  TopSectionWidget(this._globalKey);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _TopSectionState();
+  }
+}
+class _TopSectionState extends State<TopSectionWidget> {
+
+
+  @override
+  void initState() {
+    print("Top init");
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.blue,
+      alignment: Alignment.center,
+      child: FlatButton(child: Text("Full Screen"),
+        color: Colors.grey,
+        onPressed: (){
+          widget._globalKey.currentState.setFullScreen();
+        },),
+    );
+  }
+
+  @override
+  void dispose() {
+    print("Top dispose");
+    super.dispose();
   }
 }
 
