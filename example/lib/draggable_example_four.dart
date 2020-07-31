@@ -13,9 +13,21 @@ class DraggableExampleState extends State<DraggableExampleFour> {
   int _currentTabIndex = 0;
   List<Widget> widgetsAdded = List();
 
+  static Size getDockPanelSize(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    double containerWidth = width * .8;
+    double containerHeight = containerWidth * 8 / 16;
+    return Size(containerWidth, containerHeight);
+  }
+
+  static double getToSectionHeight(BuildContext context) {
+    double height = MediaQuery.of(context).size.height;
+    return height * .3;
+  }
+
   @override
   Widget build(BuildContext context) {
-
+    Size dockStateSize = getDockPanelSize(context);
     return WillPopScope(
       onWillPop: onBackPressed,
       child: DraggablePanel(
@@ -70,8 +82,9 @@ class DraggableExampleState extends State<DraggableExampleFour> {
         topChild:  TopSectionWidget(_globalKey),
         bottomChild: Container(color: Colors.red,),
         defaultShow: false,
-        topChildDockHeight: 140,
-//        defaultTopPadding: 100,
+        topChildDockWidth: dockStateSize.width,
+        topChildDockHeight: dockStateSize.height,
+        topChildHeight: getToSectionHeight(context),
       ),
     );
   }
