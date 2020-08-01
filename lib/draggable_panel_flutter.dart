@@ -109,6 +109,8 @@ class DraggableState extends State<DraggablePanel> {
 
   bool isShown() => !_hide;
 
+  bool isFullScreen() => _isFullScreen;
+
   minimise() {
     _dragDown();
   }
