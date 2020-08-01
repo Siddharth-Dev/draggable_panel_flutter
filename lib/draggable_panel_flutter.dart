@@ -41,6 +41,7 @@ class DraggableState extends State<DraggablePanel> {
 
   double maxDockStateHeight = 0;
   double _defaultTopPadding = 0;
+  double _systemStatusBarHeight;
   double _containerWidth;
   double _containerHeight;
   double _minWidth;
@@ -54,6 +55,7 @@ class DraggableState extends State<DraggablePanel> {
   bool _isMinimised = false;
   bool _pop;
   Size screenSize;
+  Size _originalScreenSize;
   double _upperLimit, _lowerLimit;
   double _scaleY = 1;
   double _scaleX = 1;
@@ -183,8 +185,11 @@ class DraggableState extends State<DraggablePanel> {
             right: _right,
             onEnd: () {
               if (!_isMinimised && !_hide && !_verticalDragging && !_isFullScreen) {
-                setState(() {
-                  _betweenChildVisible = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  setState(() {
+                    animationD = 0;
+                    _betweenChildVisible = true;
+                  });
                 });
               }
               if (isMinimised() && _pop) {
@@ -374,15 +379,15 @@ class DraggableState extends State<DraggablePanel> {
           ),
 
           if (widget.childBetweenTopAndBottom != null)
-          Positioned(
-            left: !_betweenChildVisible ? screenSize.width + 100 : 0 + widget.childBetweenTopAndBottomLeftMargin,
-            right: 0 + widget.childBetweenTopAndBottomRightMargin,
-            top: _top + widget.topChildHeight - widget.childBetweenTopAndBottomHeight/2,
-            child: Container(
-                width: widget.childBetweenTopAndBottomWidth,
-                height: widget.childBetweenTopAndBottomHeight,
-                child: widget.childBetweenTopAndBottom),
-          )
+            Positioned(
+              left: !_betweenChildVisible ? screenSize.width + 100 : 0 + widget.childBetweenTopAndBottomLeftMargin,
+              right: 0 + widget.childBetweenTopAndBottomRightMargin,
+              top: _top + widget.topChildHeight - widget.childBetweenTopAndBottomHeight/2,
+              child: Container(
+                  width: widget.childBetweenTopAndBottomWidth,
+                  height: widget.childBetweenTopAndBottomHeight,
+                  child: widget.childBetweenTopAndBottom),
+            )
         ],
       ),
     );
@@ -484,8 +489,10 @@ class DraggableState extends State<DraggablePanel> {
     previousOrientation = MediaQuery.of(context).orientation;
     if (OrientationUtils.isLandscape(context)) {
       animationD = 0;
+      SystemChrome.setEnabledSystemUIOverlays([]);
       _fullScreen();
     } else if (_isOrientationChanged) {
+      SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
       animationD = 0;
       _betweenChildVisible = true;
       _isFullScreen = false;
@@ -493,18 +500,19 @@ class DraggableState extends State<DraggablePanel> {
       _dragUp(changeState: false);
     }
     if (screenSize == null || _isOrientationChanged) {
-      print("screenSize changed");
-      screenSize = MediaQuery.of(context).size;
-      if (_isFullScreen) {
-        if (widget.defaultTopPadding == null) {
-          _defaultTopPadding = MediaQuery
-              .of(context)
-              .padding
-              .top;
-        } else {
-          _defaultTopPadding = widget.defaultTopPadding;
-        }
+
+      if (_originalScreenSize == null) {
+        _originalScreenSize = MediaQuery.of(context).size;
       }
+      if (_systemStatusBarHeight == null) {
+        _systemStatusBarHeight = MediaQuery.of(context).padding.top;
+      }
+      if (widget.defaultTopPadding == null) {
+        _defaultTopPadding = _systemStatusBarHeight;
+      } else {
+        _defaultTopPadding = widget.defaultTopPadding;
+      }
+      screenSize =  Size(_isFullScreen ? _originalScreenSize.height : _originalScreenSize.width, _isFullScreen ? _originalScreenSize.width : _originalScreenSize.height);
       maxDockStateHeight = widget.topChildDockHeight + widget.dockStateBottomMargin;
       _top = _isFullScreen ? 0 : _defaultTopPadding;
       _containerHeight = widget.topChildHeight;

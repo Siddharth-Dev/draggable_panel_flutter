@@ -139,7 +139,7 @@ class _TopSectionState extends State<TopSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.blue,
+      color: Colors.lightBlue,
       alignment: Alignment.center,
       child: FlatButton(child: Text("Full Screen"),
         color: Colors.grey,
