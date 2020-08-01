@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:draggable_panel_flutter/orientation_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'drag_listener.dart';
@@ -374,7 +375,7 @@ class DraggableState extends State<DraggablePanel> {
 
           if (widget.childBetweenTopAndBottom != null)
           Positioned(
-            left: !_betweenChildVisible ? screenSize.width : 0 + widget.childBetweenTopAndBottomLeftMargin,
+            left: !_betweenChildVisible ? screenSize.width + 100 : 0 + widget.childBetweenTopAndBottomLeftMargin,
             right: 0 + widget.childBetweenTopAndBottomRightMargin,
             top: _top + widget.topChildHeight - widget.childBetweenTopAndBottomHeight/2,
             child: Container(
@@ -395,7 +396,7 @@ class DraggableState extends State<DraggablePanel> {
   _fullScreen() {
     animationD = 0;
     _isFullScreen = true;
-    _top = _defaultTopPadding;
+    _top = 0;
     _containerWidth = screenSize.width;
     _containerHeight = screenSize.height;
     _right = 0;
@@ -494,16 +495,18 @@ class DraggableState extends State<DraggablePanel> {
     if (screenSize == null || _isOrientationChanged) {
       print("screenSize changed");
       screenSize = MediaQuery.of(context).size;
-      if (widget.defaultTopPadding == null) {
-        _defaultTopPadding = MediaQuery
-            .of(context)
-            .padding
-            .top;
-      } else {
-        _defaultTopPadding = widget.defaultTopPadding;
+      if (_isFullScreen) {
+        if (widget.defaultTopPadding == null) {
+          _defaultTopPadding = MediaQuery
+              .of(context)
+              .padding
+              .top;
+        } else {
+          _defaultTopPadding = widget.defaultTopPadding;
+        }
       }
       maxDockStateHeight = widget.topChildDockHeight + widget.dockStateBottomMargin;
-      _top = _defaultTopPadding;
+      _top = _isFullScreen ? 0 : _defaultTopPadding;
       _containerHeight = widget.topChildHeight;
       _containerWidth = screenSize.width;
       _minWidth = widget.topChildDockWidth;
