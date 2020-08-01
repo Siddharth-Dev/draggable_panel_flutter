@@ -80,7 +80,12 @@ class DraggableExampleState extends State<DraggableExampleFour> {
           ),
         ),
         topChild:  TopSectionWidget(_globalKey),
-        bottomChild: Container(color: Colors.red,),
+        bottomChild: BottomChild(),
+        childBetweenTopAndBottom: SliderWidget(),
+        childBetweenTopAndBottomHeight: 14,
+//        childBetweenTopAndBottomWidth: MediaQuery.of(context).size.width + 20,
+//        childBetweenTopAndBottomLeftMargin: -5,
+//        childBetweenTopAndBottomRightMargin: -5,
         defaultShow: false,
         topChildDockWidth: dockStateSize.width,
         topChildDockHeight: dockStateSize.height,
@@ -151,6 +156,25 @@ class _TopSectionState extends State<TopSectionWidget> {
   }
 }
 
+class BottomChild extends StatelessWidget {
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(10),
+      color: Colors.red,
+      child: Column(
+        children: <Widget>[
+          Text("Hello welcome to this awesome example"),
+          SizedBox(height: 20,),
+        ],
+
+      ),
+
+    );
+  }
+}
+
 class NewScreen extends StatelessWidget {
 
   final String title;
@@ -178,5 +202,55 @@ class NewScreen extends StatelessWidget {
       },),
       automaticallyImplyLeading: true,
     );
+  }
+}
+
+class SliderWidget extends StatefulWidget {
+  @override
+  SliderWidgetState createState() => new SliderWidgetState();
+}
+
+class SliderWidgetState extends State{
+
+  double valueHolder = 20;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliderTheme(
+      data: SliderThemeData(
+        trackShape: CustomTrackShape(),
+        activeTrackColor: Colors.white,
+        inactiveTrackColor: Colors.black,
+        disabledActiveTrackColor: Colors.brown,
+        disabledInactiveTrackColor: Colors.amberAccent
+      ),
+      child: Slider(
+        value: valueHolder,
+        activeColor: Colors.white,
+        min: 1,
+        max: 100,
+        onChanged: (double value) {
+          setState(() {
+            valueHolder = value;
+          });
+        },
+      ),
+    );
+  }
+}
+
+class CustomTrackShape extends RoundedRectSliderTrackShape {
+  Rect getPreferredRect({
+    @required RenderBox parentBox,
+    Offset offset = Offset.zero,
+    @required SliderThemeData sliderTheme,
+    bool isEnabled = false,
+    bool isDiscrete = false,
+  }) {
+    final double trackHeight = sliderTheme.trackHeight;
+    final double trackLeft = offset.dx;
+    final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
+    final double trackWidth = parentBox.size.width;
+    return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
   }
 }

@@ -11,16 +11,21 @@ class DraggablePanel extends StatefulWidget {
   final Widget parent;
   final Widget topChild;
   final Widget bottomChild;
+  final Widget childBetweenTopAndBottom;
   final double topChildHeight;
   final double topChildDockHeight;
   final double topChildDockWidth;
   final double dockStateBottomMargin;
   final double defaultTopPadding;
+  final double childBetweenTopAndBottomHeight;
+  final double childBetweenTopAndBottomWidth;
+  final double childBetweenTopAndBottomLeftMargin;
+  final double childBetweenTopAndBottomRightMargin;
   final bool defaultShow;
   final Color backgroundColor;
   final DragListener listener;
 
-  DraggablePanel({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.listener, this.defaultShow = true, this.backgroundColor = Colors.transparent, this.defaultTopPadding, this.dockStateBottomMargin = 50}): super(key: key) {
+  DraggablePanel({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.childBetweenTopAndBottom, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.listener, this.defaultShow = true, this.backgroundColor = Colors.transparent, this.defaultTopPadding, this.dockStateBottomMargin = 50, this.childBetweenTopAndBottomHeight = 10, this.childBetweenTopAndBottomWidth = double.maxFinite, this.childBetweenTopAndBottomLeftMargin = 0, this.childBetweenTopAndBottomRightMargin = 0}): super(key: key) {
     assert(topChild != null);
     assert(bottomChild != null);
   }
@@ -60,8 +65,13 @@ class DraggableState extends State<DraggablePanel> {
   Timer _debounce;
   bool _forceLandscape = false;
   bool _verticalDragging = false;
+  bool _betweenChildVisible = false;
 
-  DraggableState(this._hide);
+  DraggableState(this._hide){
+    if (_hide) {
+      _betweenChildVisible = false;
+    }
+  }
 
   addWidgetInBetween(Widget widget) {
     _backWidgets.add(widget);
@@ -78,15 +88,18 @@ class DraggableState extends State<DraggablePanel> {
     if (reset) {
       resetAttributes();
     }
+    if (!_isFullScreen) {
+      _betweenChildVisible = true;
+    }
     setState(() {
       _hide = false;
     });
   }
 
   hide() {
-//    _hidePanel();
     setState(() {
       _hide = true;
+      _betweenChildVisible = false;
     });
   }
 
@@ -166,6 +179,11 @@ class DraggableState extends State<DraggablePanel> {
             left: _left,
             right: _right,
             onEnd: () {
+              if (!_isMinimised && !_hide && !_verticalDragging && !_isFullScreen) {
+                setState(() {
+                  _betweenChildVisible = true;
+                });
+              }
               if (isMinimised() && _pop) {
                 _pop = false;
                 print("Finished");
@@ -240,11 +258,13 @@ class DraggableState extends State<DraggablePanel> {
                     }
                   }
                 },
+
                 onVerticalDragCancel: () {
                   _verticalDragging = false;
                 },
-                onVerticalDragDown: (detail) {
-                  if (_isFullScreen) {
+
+                onVerticalDragStart: (detail) {
+                  if (!_isFullScreen) {
                     _verticalDragging = true;
                   }
                 },
@@ -254,6 +274,10 @@ class DraggableState extends State<DraggablePanel> {
                   if (_isFullScreen) {
                     return;
                   }
+                  setState(() {
+                    _betweenChildVisible = false;
+                  });
+
                   if (!_isMinimised) {
                     _pop = false;
                     animationD = 200;
@@ -305,6 +329,7 @@ class DraggableState extends State<DraggablePanel> {
                       _containerWidth = _minWidth;
                       _containerHeight = _minHeight;
                       _isMinimised = true;
+                      _betweenChildVisible = false;
                       _left = screenSize.width - _minWidth;
                     }
 
@@ -343,6 +368,17 @@ class DraggableState extends State<DraggablePanel> {
             height: screenSize.height - _bottomTopMargin(),
             width: screenSize.width,
             child: widget.bottomChild,
+          ),
+
+          if (widget.childBetweenTopAndBottom != null)
+          Positioned(
+            left: !_betweenChildVisible ? screenSize.width : 0 + widget.childBetweenTopAndBottomLeftMargin,
+            right: 0 + widget.childBetweenTopAndBottomRightMargin,
+            top: _top + widget.topChildHeight - widget.childBetweenTopAndBottomHeight/2,
+            child: Container(
+                width: widget.childBetweenTopAndBottomWidth,
+                height: widget.childBetweenTopAndBottomHeight,
+                child: widget.childBetweenTopAndBottom),
           )
         ],
       ),
@@ -355,6 +391,7 @@ class DraggableState extends State<DraggablePanel> {
   }
 
   _fullScreen() {
+    animationD = 0;
     _isFullScreen = true;
     _top = _defaultTopPadding;
     _containerWidth = screenSize.width;
@@ -362,6 +399,7 @@ class DraggableState extends State<DraggablePanel> {
     _right = 0;
     _left = 0;
     _isMinimised = false;
+    _betweenChildVisible = false;
     widget.listener?.onFullScreen();
     _horizontalDrag = 0;
     _scaleY = 1;
@@ -376,6 +414,7 @@ class DraggableState extends State<DraggablePanel> {
     _right =0;
     _horizontalDrag = 0;
     _isMinimised = true;
+    _betweenChildVisible = false;
     _scaleY = _minScaleY;
     _scaleX = _minScaleX;
     widget.listener?.onMinimised();
@@ -436,20 +475,16 @@ class DraggableState extends State<DraggablePanel> {
     });
   }
 
-  _hidePanel() {
-    _left = screenSize.width;
-    _right = - _minWidth;
-    _pop = true;
-    _horizontalDrag = 0;
-  }
-
   _init() {
     _afterBuildUpdate();
     _isOrientationChanged = previousOrientation == null ? false : previousOrientation != MediaQuery.of(context).orientation;
     previousOrientation = MediaQuery.of(context).orientation;
     if (OrientationUtils.isLandscape(context)) {
+      animationD = 0;
       _fullScreen();
     } else if (_isOrientationChanged) {
+      animationD = 0;
+      _betweenChildVisible = true;
       _isFullScreen = false;
       _forceLandscape = false;
       _dragUp(changeState: false);
@@ -475,9 +510,6 @@ class DraggableState extends State<DraggablePanel> {
       _lowerLimit = screenSize.height;
       _minScaleY = widget.topChildDockHeight / widget.topChildHeight;
       _minScaleX = widget.topChildDockWidth / screenSize.width;
-      if (_hide) {
-//        _hidePanel();
-      }
     }
   }
 
