@@ -34,7 +34,7 @@ class DraggablePanel extends StatefulWidget {
   }
 
   @override
-  DraggableState createState() => DraggableState(!defaultShow);
+  DraggableState createState() => DraggableState(!defaultShow, topChildHeight);
 
 }
 
@@ -48,6 +48,7 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
   double _containerHeight;
   double _minWidth;
   double _minHeight;
+  double _originalToHeight;
   bool _hide = false;
   double _top = 0;
   double _maxTop = 0;
@@ -73,7 +74,7 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
   AnimationController controller;
   bool _isUp = false;
 
-  DraggableState(this._hide){
+  DraggableState(this._hide, this._originalToHeight){
     if (_hide) {
       _betweenChildVisible = false;
     }
@@ -165,7 +166,7 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
     _pop = false;
     _top = _defaultTopPadding;
     _containerWidth = screenSize.width;
-    _containerHeight = widget.topChildHeight;
+    _containerHeight = _originalToHeight;
     _right = 0;
     _left = 0;
     _isMinimised = false;
@@ -304,7 +305,7 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
                 },
                 child: Container(
                   width: _containerWidth,
-                  height: _isFullScreen ?  screenSize.height : _containerHeight,
+                  height: _containerHeight,
                   child: AbsorbPointer(
                       absorbing: _isMinimised,
                       child: widget.topChild),
@@ -324,7 +325,7 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
             Positioned(
               left: !_betweenChildVisible ? screenSize.width + 100 : 0 + widget.childBetweenTopAndBottomLeftMargin,
               right: 0 + widget.childBetweenTopAndBottomRightMargin,
-              top: _top + widget.topChildHeight - widget.childBetweenTopAndBottomHeight/2,
+              top: _top + _originalToHeight - widget.childBetweenTopAndBottomHeight/2,
               child: Container(
                   width: widget.childBetweenTopAndBottomWidth,
                   height: widget.childBetweenTopAndBottomHeight,
@@ -337,15 +338,15 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
 
   double _bottomTopMargin() {
     double value = (_containerHeight + widget.dockStateBottomMargin);
-    return value > widget.topChildHeight ? widget.topChildHeight : value;
+    return value > _originalToHeight ? _originalToHeight : value;
   }
 
   _updateVerticalState(bool isUp) {
     if (isUp) {
-      _containerHeight = widget.topChildHeight - ((_top - _defaultTopPadding) * _minScaleY);
+      _containerHeight = _originalToHeight - ((_top - _defaultTopPadding) * _minScaleY);
       _containerWidth = screenSize.width - ((_top - _defaultTopPadding) * _minScaleX);
-      if (_containerHeight >= widget.topChildHeight) {
-        _containerHeight = widget.topChildHeight;
+      if (_containerHeight >= _originalToHeight) {
+        _containerHeight = _originalToHeight;
       }
 
       if (_containerWidth >= screenSize.width) {
@@ -353,7 +354,7 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
       }
 
     } else {
-      _containerHeight = widget.topChildHeight - ((_top - _defaultTopPadding) * _minScaleY);
+      _containerHeight = _originalToHeight - ((_top - _defaultTopPadding) * _minScaleY);
       _containerWidth = screenSize.width - ((_top - _defaultTopPadding) * _minScaleX);
 
       if (_containerHeight <= _minHeight) {
@@ -391,8 +392,6 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
     animationD = 0;
     _isFullScreen = true;
     _top = 0;
-    _containerWidth = screenSize.width;
-    _containerHeight = screenSize.height;
     _right = 0;
     _left = 0;
     _isMinimised = false;
@@ -402,13 +401,11 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
   }
 
   _dragDown() {
-    print("dragDown, top value: $_top");
     _isUp = false;
     _animateTo(_top, _maxTop);
   }
 
   _dragUp() {
-    print("dragUp, top value: $_top");
     _isUp = true;
     _animateTo(_top >=_maxTop ? _maxTop-1 : _top, _defaultTopPadding);
   }
@@ -416,7 +413,7 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
   _dragUpState() {
     _top = _defaultTopPadding;
     _containerWidth = screenSize.width;
-    _containerHeight = widget.topChildHeight;
+    _containerHeight = _originalToHeight;
     _right = 0;
     _left = 0;
     _isMinimised = false;
@@ -513,20 +510,17 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
       screenSize =  Size(_isFullScreen ? _originalScreenSize.height : _originalScreenSize.width, _isFullScreen ? _originalScreenSize.width : _originalScreenSize.height);
       maxDockStateHeight = widget.topChildDockHeight + widget.dockStateBottomMargin;
       _top = _isFullScreen ? 0 : _defaultTopPadding;
-      _containerHeight = widget.topChildHeight;
+      _containerHeight = _isFullScreen ? screenSize.height : _originalToHeight;
       _containerWidth = screenSize.width;
       _minWidth = widget.topChildDockWidth;
       _minHeight = widget.topChildDockHeight;
-      double heightDiff = widget.topChildHeight - widget.topChildDockHeight;
+      double heightDiff = _originalToHeight - widget.topChildDockHeight;
       double widthDiff = screenSize.width - widget.topChildDockWidth;
       _maxTop = screenSize.height - maxDockStateHeight;
       double topDiff = _maxTop - _defaultTopPadding;
 
       _minScaleY = heightDiff / topDiff;
       _minScaleX = widthDiff / topDiff;
-//      print("Top Height : ${widget.topChildHeight}, Dock Height: ${widget.topChildDockHeight}");
-//      print("Height Diff : $heightDiff, Top Diff: $topDiff");
-//      print("Scale Y : $_minScaleY");
     }
   }
 
