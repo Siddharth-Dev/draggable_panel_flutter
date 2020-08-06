@@ -89,5 +89,6 @@ Other properties of the DraggablePanel-
   - childBetweenTopAndBottomWidth: Width of the between widget
   - childBetweenTopAndBottomLeftMargin: Left margin for the between child
   - childBetweenTopAndBottomRightMargin: Right margin for the between child
+  - dragAnimationDuration: Animation duration for dragging
 
 ### Note: As you can see we have to place every widget inside same stack to access the touch event from panel when minimised. I am looking for something which may allow us to pass touch events to back widget without placing them in same stack. In case you find anything let me know.
