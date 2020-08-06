@@ -22,12 +22,13 @@ class DraggablePanel extends StatefulWidget {
   final double childBetweenTopAndBottomWidth;
   final double childBetweenTopAndBottomLeftMargin;
   final double childBetweenTopAndBottomRightMargin;
-  final int dragAnimationDuration;
+  final int manualDragAnimationDuration;
+  final int autoDragAnimationDuration;
   final bool defaultShow;
   final Color backgroundColor;
   final DragListener listener;
 
-  DraggablePanel({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.childBetweenTopAndBottom, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.listener, this.defaultShow = true, this.backgroundColor = Colors.transparent, this.defaultTopPadding, this.dockStateBottomMargin = 50, this.childBetweenTopAndBottomHeight = 10, this.childBetweenTopAndBottomWidth = double.maxFinite, this.childBetweenTopAndBottomLeftMargin = 0, this.childBetweenTopAndBottomRightMargin = 0, this.dragAnimationDuration = 200}): super(key: key) {
+  DraggablePanel({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.childBetweenTopAndBottom, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.listener, this.defaultShow = true, this.backgroundColor = Colors.transparent, this.defaultTopPadding, this.dockStateBottomMargin = 50, this.childBetweenTopAndBottomHeight = 10, this.childBetweenTopAndBottomWidth = double.maxFinite, this.childBetweenTopAndBottomLeftMargin = 0, this.childBetweenTopAndBottomRightMargin = 0, this.manualDragAnimationDuration = 300, this.autoDragAnimationDuration = 300}): super(key: key) {
     assert(topChild != null);
     assert(bottomChild != null);
   }
@@ -37,7 +38,7 @@ class DraggablePanel extends StatefulWidget {
 
 }
 
-class DraggableState extends State<DraggablePanel> {
+class DraggableState extends State<DraggablePanel> with SingleTickerProviderStateMixin {
 
 
   double maxDockStateHeight = 0;
@@ -49,6 +50,7 @@ class DraggableState extends State<DraggablePanel> {
   double _minHeight;
   bool _hide = false;
   double _top = 0;
+  double _maxTop = 0;
   double _left = 0;
   double _right = 0;
   double _horizontalDrag;
@@ -57,9 +59,6 @@ class DraggableState extends State<DraggablePanel> {
   bool _pop;
   Size screenSize;
   Size _originalScreenSize;
-  double _upperLimit, _lowerLimit;
-  double _scaleY = 1;
-  double _scaleX = 1;
   double _minScaleX;
   double _minScaleY;
   bool _isFullScreen = false;
@@ -70,11 +69,22 @@ class DraggableState extends State<DraggablePanel> {
   bool _forceLandscape = false;
   bool _verticalDragging = false;
   bool _betweenChildVisible = false;
+  Animation<double> animation;
+  AnimationController controller;
+  bool _isUp = false;
 
   DraggableState(this._hide){
     if (_hide) {
       _betweenChildVisible = false;
     }
+  }
+
+  @override
+  initState() {
+    controller =
+        AnimationController(duration: Duration(milliseconds: widget.autoDragAnimationDuration), vsync: this);
+
+    super.initState();
   }
 
   addWidgetInBetween(Widget widget) {
@@ -161,8 +171,6 @@ class DraggableState extends State<DraggablePanel> {
     _isMinimised = false;
     widget.listener?.onMaximised();
     _horizontalDrag = 0;
-    _scaleY = 1;
-    _scaleX = 1;
     if (notifyStateChange) {
       setState(() {});
     }
@@ -219,14 +227,14 @@ class DraggableState extends State<DraggablePanel> {
                   double velocity = detail.primaryVelocity < 0 ? -detail.primaryVelocity : detail.primaryVelocity;
                   if (_isMinimised) {
                     if (velocity > 800) {
-                      animationD = 500;
+                      animationD = widget.autoDragAnimationDuration;
                       if (isHorizontal) {
                         _dragLeft();
                       } else {
                         _dragRight();
                       }
                     } else {
-                      animationD = 300;
+                      animationD = widget.autoDragAnimationDuration;
                       _dockPosition();
                     }
                   }
@@ -238,7 +246,7 @@ class DraggableState extends State<DraggablePanel> {
                     return;
                   }
                   if (_isMinimised){
-                    animationD = 300;
+                    animationD = widget.manualDragAnimationDuration;
                     _horizontalDrag = detail.primaryDelta;
                     _left = _left + _horizontalDrag;
                     _right = _right - _horizontalDrag;
@@ -256,13 +264,10 @@ class DraggableState extends State<DraggablePanel> {
                   }
                   if (!_isMinimised) {
                     if (detail.primaryVelocity > 600) {
-                      animationD = 500;
                       _dragDown();
                     } else if (_top < screenSize.height / 3) {
-                      animationD = 500;
                       _dragUp();
                     } else {
-                      animationD = 500;
                       _dragDown();
                     }
                   }
@@ -289,85 +294,20 @@ class DraggableState extends State<DraggablePanel> {
 
                   if (!_isMinimised) {
                     _pop = false;
-                    animationD = widget.dragAnimationDuration;
+                    animationD = 0;
                     _top = _top + detail.primaryDelta;
                     widget?.listener?.onDrag(_top);
                     bool isUp = detail.primaryDelta < 0;
-
-                    if (isUp) {
-                      if (_containerHeight < widget.topChildHeight ||
-                          _containerWidth < screenSize.width) {
-                        _containerHeight++;
-                        _containerWidth++;
-                        if (_containerHeight >= widget.topChildHeight) {
-                          _containerHeight = widget.topChildHeight;
-                        }
-
-                        if (_containerWidth >= screenSize.width) {
-                          _containerWidth = screenSize.width;
-                        } else {
-                          _left--;
-                        }
-                      }
-
-                    } else if (_top > screenSize.height / 4
-                        && _top + maxDockStateHeight >= _upperLimit
-                        && _top + maxDockStateHeight <= _lowerLimit) {
-                      _containerHeight--;
-                      _containerWidth--;
-                      if (_containerHeight <= _minHeight) {
-                        _containerHeight = _minHeight;
-                      }
-
-                      if (_containerWidth <= _minWidth) {
-                        _containerWidth = _minWidth;
-                      } else {
-                        _left++;
-                      }
-
-                      if (_left > (screenSize.width - _minWidth)) {
-                        _left = screenSize.width - _minWidth;
-                      }
-
-                    }
-
-
-                    if (_top < _defaultTopPadding) {
-                      _top = _defaultTopPadding;
-                    } else if (_top + maxDockStateHeight >= (screenSize.height)) {
-                      _top = screenSize.height - maxDockStateHeight;
-                      _containerWidth = _minWidth;
-                      _containerHeight = _minHeight;
-                      _isMinimised = true;
-                      _betweenChildVisible = false;
-                      _left = screenSize.width - _minWidth;
-                    }
-
-                    _scaleX = _containerWidth / screenSize.width;
-                    _scaleY = _containerHeight / widget.topChildHeight;
-
-                    if (isUp) {
-                      _scaleX = _scaleX > 1 ? 1 : _scaleX;
-                      _scaleY = _scaleY > 1 ? 1 : _scaleY;
-                    } else {
-                      _scaleX = _scaleX < _minScaleX ? _minScaleX : _scaleX;
-                      _scaleY = _scaleY < _minScaleY ? _minScaleY : _scaleY;
-                    }
+                    _updateVerticalState(isUp);
                   }
 
-                  setState(() {
-                  });
                 },
-                child: Transform(
-                  transform: Matrix4.diagonal3Values(_scaleX, _scaleY, 1),
-                  alignment: Alignment.topRight,
-                  child: Container(
-                    width: screenSize.width,
-                    height: _isFullScreen ?  screenSize.height : widget.topChildHeight,
-                    child: AbsorbPointer(
-                        absorbing: _isMinimised,
-                        child: widget.topChild),
-                  ),
+                child: Container(
+                  width: _containerWidth,
+                  height: _isFullScreen ?  screenSize.height : _containerHeight,
+                  child: AbsorbPointer(
+                      absorbing: _isMinimised,
+                      child: widget.topChild),
                 )
             ),
           ),
@@ -396,8 +336,55 @@ class DraggableState extends State<DraggablePanel> {
   }
 
   double _bottomTopMargin() {
-    double value = (widget.topChildHeight * _scaleY + widget.dockStateBottomMargin);
+    double value = (_containerHeight + widget.dockStateBottomMargin);
     return value > widget.topChildHeight ? widget.topChildHeight : value;
+  }
+
+  _updateVerticalState(bool isUp) {
+    if (isUp) {
+      _containerHeight = widget.topChildHeight - ((_top - _defaultTopPadding) * _minScaleY);
+      _containerWidth = screenSize.width - ((_top - _defaultTopPadding) * _minScaleX);
+      if (_containerHeight >= widget.topChildHeight) {
+        _containerHeight = widget.topChildHeight;
+      }
+
+      if (_containerWidth >= screenSize.width) {
+        _containerWidth = screenSize.width;
+      }
+
+    } else {
+      _containerHeight = widget.topChildHeight - ((_top - _defaultTopPadding) * _minScaleY);
+      _containerWidth = screenSize.width - ((_top - _defaultTopPadding) * _minScaleX);
+
+      if (_containerHeight <= _minHeight) {
+        _containerHeight = _minHeight;
+      }
+
+      if (_containerWidth <= _minWidth) {
+        _containerWidth = _minWidth;
+      }
+
+    }
+
+    _left = screenSize.width - _containerWidth;
+
+
+    if (_top <= _defaultTopPadding) {
+      _top = _defaultTopPadding;
+      _isMinimised = false;
+      widget.listener?.onMaximised();
+    } else if (_top + maxDockStateHeight >= (screenSize.height)) {
+      _top = screenSize.height - maxDockStateHeight;
+      _containerWidth = _minWidth;
+      _containerHeight = _minHeight;
+      _isMinimised = true;
+      _betweenChildVisible = false;
+      _left = screenSize.width - _minWidth;
+      widget.listener?.onMinimised();
+    }
+
+    setState(() {
+    });
   }
 
   _fullScreen() {
@@ -412,11 +399,31 @@ class DraggableState extends State<DraggablePanel> {
     _betweenChildVisible = false;
     widget.listener?.onFullScreen();
     _horizontalDrag = 0;
-    _scaleY = 1;
-    _scaleX = 1;
   }
 
-  _dragDown({bool changeState = true}) {
+  _dragDown() {
+    print("dragDown, top value: $_top");
+    _isUp = false;
+    _animateTo(_top, _maxTop);
+  }
+
+  _dragUp() {
+    print("dragUp, top value: $_top");
+    _isUp = true;
+    _animateTo(_top >=_maxTop ? _maxTop-1 : _top, _defaultTopPadding);
+  }
+
+  _dragUpState() {
+    _top = _defaultTopPadding;
+    _containerWidth = screenSize.width;
+    _containerHeight = widget.topChildHeight;
+    _right = 0;
+    _left = 0;
+    _isMinimised = false;
+    _horizontalDrag = 0;
+  }
+
+  _dragDownState() {
     _top = screenSize.height - maxDockStateHeight;
     _containerWidth = _minWidth;
     _containerHeight = _minHeight;
@@ -425,32 +432,6 @@ class DraggableState extends State<DraggablePanel> {
     _horizontalDrag = 0;
     _isMinimised = true;
     _betweenChildVisible = false;
-    _scaleY = _minScaleY;
-    _scaleX = _minScaleX;
-    widget.listener?.onMinimised();
-    if (changeState) {
-      setState(() {
-
-      });
-    }
-  }
-
-  _dragUp({bool changeState = true}) {
-    _top = _defaultTopPadding;
-    _containerWidth = screenSize.width;
-    _containerHeight = widget.topChildHeight;
-    _right = 0;
-    _left = 0;
-    _isMinimised = false;
-    widget.listener?.onMaximised();
-    _horizontalDrag = 0;
-    _scaleY = 1;
-    _scaleX = 1;
-    if (changeState) {
-      setState(() {
-
-      });
-    }
   }
 
   _dragLeft({bool changeState = true}) {
@@ -485,6 +466,21 @@ class DraggableState extends State<DraggablePanel> {
     });
   }
 
+  _animateTo(double from, double end) {
+    controller?.stop();
+    controller?.reset();
+
+    animation = Tween<double>(begin: from, end: end).animate(controller)
+      ..addListener(() {
+        animationD = 0;
+        _top = animation.value;
+        _updateVerticalState(_isUp);
+      });
+
+    controller.forward();
+
+  }
+
   _init() {
     _afterBuildUpdate();
     _isOrientationChanged = previousOrientation == null ? false : previousOrientation != MediaQuery.of(context).orientation;
@@ -499,7 +495,7 @@ class DraggableState extends State<DraggablePanel> {
       _betweenChildVisible = true;
       _isFullScreen = false;
       _forceLandscape = false;
-      _dragUp(changeState: false);
+      _dragUpState();
     }
     if (screenSize == null || _isOrientationChanged) {
 
@@ -521,10 +517,16 @@ class DraggableState extends State<DraggablePanel> {
       _containerWidth = screenSize.width;
       _minWidth = widget.topChildDockWidth;
       _minHeight = widget.topChildDockHeight;
-      _upperLimit = screenSize.height - _minHeight < _minWidth ? _minHeight : _minWidth;
-      _lowerLimit = screenSize.height;
-      _minScaleY = widget.topChildDockHeight / widget.topChildHeight;
-      _minScaleX = widget.topChildDockWidth / screenSize.width;
+      double heightDiff = widget.topChildHeight - widget.topChildDockHeight;
+      double widthDiff = screenSize.width - widget.topChildDockWidth;
+      _maxTop = screenSize.height - maxDockStateHeight;
+      double topDiff = _maxTop - _defaultTopPadding;
+
+      _minScaleY = heightDiff / topDiff;
+      _minScaleX = widthDiff / topDiff;
+//      print("Top Height : ${widget.topChildHeight}, Dock Height: ${widget.topChildDockHeight}");
+//      print("Height Diff : $heightDiff, Top Diff: $topDiff");
+//      print("Scale Y : $_minScaleY");
     }
   }
 
