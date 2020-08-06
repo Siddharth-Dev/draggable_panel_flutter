@@ -22,11 +22,12 @@ class DraggablePanel extends StatefulWidget {
   final double childBetweenTopAndBottomWidth;
   final double childBetweenTopAndBottomLeftMargin;
   final double childBetweenTopAndBottomRightMargin;
+  final int dragAnimationDuration;
   final bool defaultShow;
   final Color backgroundColor;
   final DragListener listener;
 
-  DraggablePanel({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.childBetweenTopAndBottom, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.listener, this.defaultShow = true, this.backgroundColor = Colors.transparent, this.defaultTopPadding, this.dockStateBottomMargin = 50, this.childBetweenTopAndBottomHeight = 10, this.childBetweenTopAndBottomWidth = double.maxFinite, this.childBetweenTopAndBottomLeftMargin = 0, this.childBetweenTopAndBottomRightMargin = 0}): super(key: key) {
+  DraggablePanel({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.childBetweenTopAndBottom, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.listener, this.defaultShow = true, this.backgroundColor = Colors.transparent, this.defaultTopPadding, this.dockStateBottomMargin = 50, this.childBetweenTopAndBottomHeight = 10, this.childBetweenTopAndBottomWidth = double.maxFinite, this.childBetweenTopAndBottomLeftMargin = 0, this.childBetweenTopAndBottomRightMargin = 0, this.dragAnimationDuration = 200}): super(key: key) {
     assert(topChild != null);
     assert(bottomChild != null);
   }
@@ -288,8 +289,9 @@ class DraggableState extends State<DraggablePanel> {
 
                   if (!_isMinimised) {
                     _pop = false;
-                    animationD = 200;
+                    animationD = widget.dragAnimationDuration;
                     _top = _top + detail.primaryDelta;
+                    widget?.listener?.onDrag(_top);
                     bool isUp = detail.primaryDelta < 0;
 
                     if (isUp) {
