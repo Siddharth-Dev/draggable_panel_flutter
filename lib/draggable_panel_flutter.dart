@@ -22,13 +22,12 @@ class DraggablePanel extends StatefulWidget {
   final double childBetweenTopAndBottomWidth;
   final double childBetweenTopAndBottomLeftMargin;
   final double childBetweenTopAndBottomRightMargin;
-  final int manualDragAnimationDuration;
   final int autoDragAnimationDuration;
   final bool defaultShow;
   final Color backgroundColor;
   final DragListener listener;
 
-  DraggablePanel({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.childBetweenTopAndBottom, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.listener, this.defaultShow = true, this.backgroundColor = Colors.transparent, this.defaultTopPadding, this.dockStateBottomMargin = 50, this.childBetweenTopAndBottomHeight = 10, this.childBetweenTopAndBottomWidth = double.maxFinite, this.childBetweenTopAndBottomLeftMargin = 0, this.childBetweenTopAndBottomRightMargin = 0, this.manualDragAnimationDuration = 300, this.autoDragAnimationDuration = 300}): super(key: key) {
+  DraggablePanel({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.childBetweenTopAndBottom, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.listener, this.defaultShow = true, this.backgroundColor = Colors.transparent, this.defaultTopPadding, this.dockStateBottomMargin = 50, this.childBetweenTopAndBottomHeight = 10, this.childBetweenTopAndBottomWidth = double.maxFinite, this.childBetweenTopAndBottomLeftMargin = 0, this.childBetweenTopAndBottomRightMargin = 0, this.autoDragAnimationDuration = 300}): super(key: key) {
     assert(topChild != null);
     assert(bottomChild != null);
   }
@@ -55,7 +54,7 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
   double _left = 0;
   double _right = 0;
   double _horizontalDrag;
-  int animationD = 200;
+  int animationD = 0;
   bool _isMinimised = false;
   bool _pop;
   Size screenSize;
@@ -150,12 +149,12 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
     if (_hide) {
       return;
     }
-    animationD = 400;
     if (_isFullScreen) {
       _dragUp();
     } else if (!_isMinimised){
       _dragDown();
     } else {
+      animationD = widget.autoDragAnimationDuration;
       _dragLeft();
     }
     _isFullScreen = false;
@@ -215,7 +214,6 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
 
                 onTap: () {
                   if (_isMinimised) {
-                    animationD = 500;
                     _dragUp();
                   }
                 },
@@ -247,7 +245,7 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
                     return;
                   }
                   if (_isMinimised){
-                    animationD = widget.manualDragAnimationDuration;
+                    animationD = 0;
                     _horizontalDrag = detail.primaryDelta;
                     _left = _left + _horizontalDrag;
                     _right = _right - _horizontalDrag;
@@ -418,17 +416,6 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
     _left = 0;
     _isMinimised = false;
     _horizontalDrag = 0;
-  }
-
-  _dragDownState() {
-    _top = screenSize.height - maxDockStateHeight;
-    _containerWidth = _minWidth;
-    _containerHeight = _minHeight;
-    _left = screenSize.width - _minWidth;
-    _right =0;
-    _horizontalDrag = 0;
-    _isMinimised = true;
-    _betweenChildVisible = false;
   }
 
   _dragLeft({bool changeState = true}) {
