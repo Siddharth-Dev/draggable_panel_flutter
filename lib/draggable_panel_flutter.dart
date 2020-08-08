@@ -125,6 +125,8 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
 
   bool isFullScreen() => _isFullScreen;
 
+  bool isDraggingVertical() => _verticalDragging;
+
   minimise() {
     _dragDown();
   }
