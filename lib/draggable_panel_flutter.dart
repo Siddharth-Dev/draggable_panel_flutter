@@ -373,9 +373,11 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
     if (_top <= _defaultTopPadding) {
       _dragUpState();
       widget.listener?.onMaximised();
+      controller?.stop();
     } else if (_top + maxDockStateHeight >= (screenSize.height)) {
       _dragDownState();
       widget.listener?.onMinimised();
+      controller?.stop();
     }
 
     setState(() {
