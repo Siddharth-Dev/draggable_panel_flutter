@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:draggable_panel_flutter/draggable_panel_flutter.dart';
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 class DraggableExampleFour extends StatefulWidget {
 
@@ -28,6 +29,8 @@ class DraggableExampleState extends State<DraggableExampleFour> {
   @override
   Widget build(BuildContext context) {
     Size dockStateSize = getDockPanelSize(context);
+    final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - 14 / 2.0, 0.0);
+    double margin = kBottomNavigationBarHeight + additionalBottomPadding;
     return WillPopScope(
       onWillPop: onBackPressed,
       child: DraggablePanel(
@@ -37,7 +40,8 @@ class DraggableExampleState extends State<DraggableExampleFour> {
             title: Text("Draggable code in same stack"),
           ),
 
-          bottomNavigationBar: BottomNavigationBar(items: [
+          bottomNavigationBar: BottomNavigationBar(
+            items: [
             BottomNavigationBarItem(icon: Icon(Icons.home), title: Text("Home")),
             BottomNavigationBarItem(icon: Icon(Icons.contacts), title: Text("Contact")),
             BottomNavigationBarItem(icon: Icon(Icons.list), title: Text("My List")),
@@ -90,6 +94,7 @@ class DraggableExampleState extends State<DraggableExampleFour> {
         topChildDockWidth: dockStateSize.width,
         topChildDockHeight: dockStateSize.height,
         topChildHeight: getToSectionHeight(context),
+        dockStateBottomMargin: margin,
       ),
     );
   }
