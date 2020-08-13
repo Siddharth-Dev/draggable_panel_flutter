@@ -402,7 +402,8 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
 
   _dragDown() {
     _isUp = false;
-    _animateTo(_top, _maxTop);
+    double value = _top <= _defaultTopPadding ? (_defaultTopPadding+1) : _top;
+    _animateTo(value, _maxTop);
   }
 
   _dragUp() {
