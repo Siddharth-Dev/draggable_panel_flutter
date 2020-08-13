@@ -371,17 +371,13 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
 
 
     if (_top <= _defaultTopPadding) {
-      _top = _defaultTopPadding;
-      _isMinimised = false;
+      _dragUpState();
       widget.listener?.onMaximised();
+      controller?.stop();
     } else if (_top + maxDockStateHeight >= (screenSize.height)) {
-      _top = screenSize.height - maxDockStateHeight;
-      _containerWidth = _minWidth;
-      _containerHeight = _minHeight;
-      _isMinimised = true;
-      _betweenChildVisible = false;
-      _left = screenSize.width - _minWidth;
+      _dragDownState();
       widget.listener?.onMinimised();
+      controller?.stop();
     }
 
     setState(() {
@@ -419,6 +415,18 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
     _left = 0;
     _isMinimised = false;
     _horizontalDrag = 0;
+    _verticalDragging = false;
+  }
+
+  _dragDownState() {
+    _top = screenSize.height - maxDockStateHeight;
+    _containerWidth = _minWidth;
+    _containerHeight = _minHeight;
+    _isMinimised = true;
+    _betweenChildVisible = false;
+    _left = screenSize.width - _minWidth;
+    _right = 0;
+    _verticalDragging = false;
   }
 
   _dragLeft({bool changeState = true}) {
