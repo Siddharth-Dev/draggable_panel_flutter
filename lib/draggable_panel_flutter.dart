@@ -17,17 +17,21 @@ class DraggablePanel extends StatefulWidget {
   final double topChildDockHeight;
   final double topChildDockWidth;
   final double dockStateBottomMargin;
+  final double dockStateRightMargin;
   final double defaultTopPadding;
   final double childBetweenTopAndBottomHeight;
   final double childBetweenTopAndBottomWidth;
   final double childBetweenTopAndBottomLeftMargin;
   final double childBetweenTopAndBottomRightMargin;
   final int autoDragAnimationDuration;
+  final double dockModeCornerRadius;
+  final Color dockModeBgColor;
+  final BoxShadow dockModeShadow;
+  final bool resizeToAvoidBottomInset;
   final bool defaultShow;
-  final Color backgroundColor;
   final DragListener listener;
 
-  DraggablePanel({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.childBetweenTopAndBottom, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.listener, this.defaultShow = true, this.backgroundColor = Colors.transparent, this.defaultTopPadding, this.dockStateBottomMargin = 50, this.childBetweenTopAndBottomHeight = 10, this.childBetweenTopAndBottomWidth = double.maxFinite, this.childBetweenTopAndBottomLeftMargin = 0, this.childBetweenTopAndBottomRightMargin = 0, this.autoDragAnimationDuration = 300}): super(key: key) {
+  DraggablePanel({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.childBetweenTopAndBottom, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.listener, this.defaultShow = true, this.defaultTopPadding, this.dockStateBottomMargin = 50, this.childBetweenTopAndBottomHeight = 10, this.childBetweenTopAndBottomWidth = double.maxFinite, this.childBetweenTopAndBottomLeftMargin = 0, this.childBetweenTopAndBottomRightMargin = 0, this.autoDragAnimationDuration = 300, this.dockStateRightMargin = 5, this.dockModeCornerRadius = 0, this.dockModeBgColor = Colors.transparent, this.dockModeShadow, this.resizeToAvoidBottomInset = false}): super(key: key) {
     assert(topChild != null);
     assert(bottomChild != null);
   }
@@ -49,6 +53,7 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
   double _minHeight;
   double _originalToHeight;
   bool _hide = false;
+  double _cornerRadius = 0;
   double _top = 0;
   double _maxTop = 0;
   double _left = 0;
@@ -61,6 +66,8 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
   Size _originalScreenSize;
   double _minScaleX;
   double _minScaleY;
+  double _scaleRightMargin;
+  double _scaleDockRadius;
   bool _isFullScreen = false;
   Orientation previousOrientation;
   bool _isOrientationChanged = false;
@@ -135,6 +142,11 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
     _dragUp();
   }
 
+  close() {
+    animationD = widget.autoDragAnimationDuration;
+    _dragLeft();
+  }
+
   setFullScreen() {
     print("Full screen called");
     _fullScreen();
@@ -168,6 +180,7 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
     _top = _defaultTopPadding;
     _containerWidth = screenSize.width;
     _containerHeight = _originalToHeight;
+    _cornerRadius = 0;
     _right = 0;
     _left = 0;
     _isMinimised = false;
@@ -182,156 +195,159 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     _init();
     return Scaffold(
-      backgroundColor: widget.backgroundColor,
+      resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
       body: Stack(
-        children: <Widget>[
-          if (widget.parent != null)
-            widget.parent,
-          for (int i=0;i<_backWidgets.length;i++)
-            _backWidgets[i],
-          AnimatedPositioned(
-            duration: Duration(milliseconds: animationD),
-            top: _hide ? screenSize.height : _top,
-            left: _left,
-            right: _right,
-            onEnd: () {
-              if (!_isMinimised && !_hide && !_verticalDragging && !_isFullScreen) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  setState(() {
-                    animationD = 0;
-                    _betweenChildVisible = true;
-                  });
-                });
-              }
-              if (isMinimised() && _pop) {
-                _pop = false;
-                print("Finished");
-                hide();
-                if (widget.listener != null) {
-                  widget.listener.onExit(context);
-                }
-              }
-            },
-            child: GestureDetector(
-
-                onTap: () {
-                  if (_isMinimised) {
-                    _dragUp();
-                  }
-                },
-
-                onHorizontalDragEnd: (detail){
-                  if (_isFullScreen) {
-                    return;
-                  }
-                  bool isHorizontal = detail.primaryVelocity < 0;
-                  double velocity = detail.primaryVelocity < 0 ? -detail.primaryVelocity : detail.primaryVelocity;
-                  if (_isMinimised) {
-                    if (velocity > 800) {
-                      animationD = widget.autoDragAnimationDuration;
-                      if (isHorizontal) {
-                        _dragLeft();
-                      } else {
-                        _dragRight();
-                      }
-                    } else {
-                      animationD = widget.autoDragAnimationDuration;
-                      _dockPosition();
-                    }
-                  }
-                },
-
-
-                onHorizontalDragUpdate: (detail) {
-                  if (_isFullScreen) {
-                    return;
-                  }
-                  if (_isMinimised){
-                    animationD = 0;
-                    _horizontalDrag = detail.primaryDelta;
-                    _left = _left + _horizontalDrag;
-                    _right = _right - _horizontalDrag;
+          children: <Widget>[
+            if (widget.parent != null)
+              widget.parent,
+            for (int i=0;i<_backWidgets.length;i++)
+              _backWidgets[i],
+            AnimatedPositioned(
+              duration: Duration(milliseconds: animationD),
+              top: _hide ? screenSize.height : _top,
+              left: _left,
+              right: _right,
+              onEnd: () {
+                if (!_isMinimised && !_hide && !_verticalDragging && !_isFullScreen) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
                     setState(() {
-
+                      animationD = 0;
+                      _betweenChildVisible = true;
                     });
-                  }
-
-                },
-
-                onVerticalDragEnd: (detail){
-                  _verticalDragging = false;
-                  if (_isFullScreen) {
-                    return;
-                  }
-                  if (!_isMinimised) {
-                    if (detail.primaryVelocity > 600) {
-                      _dragDown();
-                    } else if (_top < screenSize.height / 3) {
-                      _dragUp();
-                    } else {
-                      _dragDown();
-                    }
-                  }
-                },
-
-                onVerticalDragCancel: () {
-                  _verticalDragging = false;
-                },
-
-                onVerticalDragStart: (detail) {
-                  if (!_isFullScreen) {
-                    _verticalDragging = true;
-                  }
-                },
-
-                onVerticalDragUpdate: (detail){
-
-                  if (_isFullScreen) {
-                    return;
-                  }
-                  setState(() {
-                    _betweenChildVisible = false;
                   });
-
-                  if (!_isMinimised) {
-                    _pop = false;
-                    animationD = 0;
-                    _top = _top + detail.primaryDelta;
-                    widget?.listener?.onDrag(_top);
-                    bool isUp = detail.primaryDelta < 0;
-                    _updateVerticalState(isUp);
+                }
+                if (isMinimised() && _pop) {
+                  _pop = false;
+                  print("Finished");
+                  hide();
+                  if (widget.listener != null) {
+                    widget.listener.onExit(context);
                   }
+                }
+              },
+              child: GestureDetector(
 
-                },
-                child: Container(
-                  width: _containerWidth,
-                  height: _containerHeight,
-                  child: AbsorbPointer(
-                      absorbing: _isMinimised,
-                      child: widget.topChild),
-                )
+                  onTap: () {
+                    if (_isMinimised) {
+                      _dragUp();
+                    }
+                  },
+
+                  onHorizontalDragEnd: (detail){
+                    if (_isFullScreen) {
+                      return;
+                    }
+                    bool isHorizontal = detail.primaryVelocity < 0;
+                    double velocity = detail.primaryVelocity < 0 ? -detail.primaryVelocity : detail.primaryVelocity;
+                    if (_isMinimised) {
+                      if (velocity > 800) {
+                        animationD = widget.autoDragAnimationDuration;
+                        if (isHorizontal) {
+                          _dragLeft();
+                        } else {
+                          _dragRight();
+                        }
+                      } else {
+                        animationD = widget.autoDragAnimationDuration;
+                        _dockPosition();
+                      }
+                    }
+                  },
+
+
+                  onHorizontalDragUpdate: (detail) {
+                    if (_isFullScreen) {
+                      return;
+                    }
+                    if (_isMinimised){
+                      animationD = 0;
+                      _horizontalDrag = detail.primaryDelta;
+                      _left = _left + _horizontalDrag;
+                      _right = _right - _horizontalDrag;
+                      setState(() {
+
+                      });
+                    }
+
+                  },
+
+                  onVerticalDragEnd: (detail){
+                    _verticalDragging = false;
+                    if (_isFullScreen) {
+                      return;
+                    }
+                    if (!_isMinimised) {
+                      if (detail.primaryVelocity > 600) {
+                        _dragDown();
+                      } else if (_top < screenSize.height / 3) {
+                        _dragUp();
+                      } else {
+                        _dragDown();
+                      }
+                    }
+                  },
+
+                  onVerticalDragCancel: () {
+                    _verticalDragging = false;
+                  },
+
+                  onVerticalDragStart: (detail) {
+                    if (!_isFullScreen) {
+                      _verticalDragging = true;
+                    }
+                  },
+
+                  onVerticalDragUpdate: (detail){
+
+                    if (_isFullScreen) {
+                      return;
+                    }
+                    setState(() {
+                      _betweenChildVisible = false;
+                    });
+
+                      _pop = false;
+                      animationD = 0;
+                      _top = _top + detail.primaryDelta;
+                      widget?.listener?.onDrag(_top);
+                      bool isUp = detail.primaryDelta < 0;
+                      _updateVerticalState(isUp);
+
+                  },
+                  child: Container(
+                    width: _containerWidth,
+                    height: _containerHeight,
+                    decoration: BoxDecoration(
+                      color: widget.dockModeBgColor,
+                      boxShadow: _isMinimised ? [
+                        widget.dockModeShadow
+                      ] : null,
+                      borderRadius: BorderRadius.all(Radius.circular(_cornerRadius)),
+                    ),
+                    child: widget.topChild,
+                  )
+              ),
             ),
-          ),
-          AnimatedPositioned(
-            duration: Duration(milliseconds: animationD),
-            left: 0,
-            top: _isFullScreen || _hide ? screenSize.height : (_top + _bottomTopMargin()),
-            height: screenSize.height - _bottomTopMargin(),
-            width: screenSize.width,
-            child: widget.bottomChild,
-          ),
+            AnimatedPositioned(
+              duration: Duration(milliseconds: animationD),
+              left: 0,
+              top: _isFullScreen || _hide ? screenSize.height : (_top + _bottomTopMargin()),
+              height: screenSize.height - _bottomTopMargin(),
+              width: screenSize.width,
+              child: widget.bottomChild,
+            ),
 
-          if (widget.childBetweenTopAndBottom != null)
-            Positioned(
-              left: !_betweenChildVisible ? screenSize.width + 100 : 0 + widget.childBetweenTopAndBottomLeftMargin,
-              right: 0 + widget.childBetweenTopAndBottomRightMargin,
-              top: _top + _originalToHeight - widget.childBetweenTopAndBottomHeight/2,
-              child: Container(
-                  width: widget.childBetweenTopAndBottomWidth,
-                  height: widget.childBetweenTopAndBottomHeight,
-                  child: widget.childBetweenTopAndBottom),
-            )
-        ],
+            if (widget.childBetweenTopAndBottom != null)
+              Positioned(
+                left: !_betweenChildVisible ? screenSize.width + 100 : 0 + widget.childBetweenTopAndBottomLeftMargin,
+                right: 0 + widget.childBetweenTopAndBottomRightMargin,
+                top: _top + _originalToHeight - widget.childBetweenTopAndBottomHeight/2,
+                child: Container(
+                    width: widget.childBetweenTopAndBottomWidth,
+                    height: widget.childBetweenTopAndBottomHeight,
+                    child: widget.childBetweenTopAndBottom),
+              )
+          ],
       ),
     );
   }
@@ -342,9 +358,11 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
   }
 
   _updateVerticalState(bool isUp) {
+    _containerHeight = _originalToHeight - ((_top - _defaultTopPadding) * _minScaleY);
+    _containerWidth = screenSize.width - ((_top - _defaultTopPadding) * _minScaleX);
+    _right = ((_top - _defaultTopPadding) * _scaleRightMargin);
+    _cornerRadius = ((_top - _defaultTopPadding) * _scaleDockRadius);
     if (isUp) {
-      _containerHeight = _originalToHeight - ((_top - _defaultTopPadding) * _minScaleY);
-      _containerWidth = screenSize.width - ((_top - _defaultTopPadding) * _minScaleX);
       if (_containerHeight >= _originalToHeight) {
         _containerHeight = _originalToHeight;
       }
@@ -354,9 +372,6 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
       }
 
     } else {
-      _containerHeight = _originalToHeight - ((_top - _defaultTopPadding) * _minScaleY);
-      _containerWidth = screenSize.width - ((_top - _defaultTopPadding) * _minScaleX);
-
       if (_containerHeight <= _minHeight) {
         _containerHeight = _minHeight;
       }
@@ -386,6 +401,7 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
 
   _fullScreen() {
     animationD = 0;
+    _cornerRadius = 0;
     _isFullScreen = true;
     _top = 0;
     _right = 0;
@@ -413,6 +429,7 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
     _containerHeight = _originalToHeight;
     _right = 0;
     _left = 0;
+    _cornerRadius = 0;
     _isMinimised = false;
     _horizontalDrag = 0;
     _verticalDragging = false;
@@ -425,7 +442,8 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
     _isMinimised = true;
     _betweenChildVisible = false;
     _left = screenSize.width - _minWidth;
-    _right = 0;
+    _right = widget.dockStateRightMargin;
+    _cornerRadius = widget.dockModeCornerRadius;
     _verticalDragging = false;
   }
 
@@ -454,7 +472,8 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
   _dockPosition() {
     _pop = false;
     _left = screenSize.width - _minWidth;
-    _right =0;
+    _right = widget.dockStateRightMargin;
+    _cornerRadius = widget.dockModeCornerRadius;
     _horizontalDrag = 0;
     setState(() {
 
@@ -519,6 +538,8 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
 
       _minScaleY = heightDiff / topDiff;
       _minScaleX = widthDiff / topDiff;
+      _scaleRightMargin = widget.dockStateRightMargin / topDiff;
+      _scaleDockRadius = widget.dockModeCornerRadius / topDiff;
     }
   }
 
