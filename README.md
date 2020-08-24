@@ -85,7 +85,6 @@ Other properties of the DraggablePanel-
   - defaultShow: Initial state of panel show/hide
   - dockStateBottomMargin: Bottom margin for dock state
   - dockStateRightMargin: right margin for dock state
-  - dockModeShadow: container shadow for dock state
   - dockModeCornerRadius: corner radius in dock mode
   - childBetweenTopAndBottom: Widget is placed between Top and Bottom widget
   - childBetweenTopAndBottomHeight: Height of the between widget

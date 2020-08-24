@@ -95,6 +95,7 @@ class DraggableExampleState extends State<DraggableExampleFour> {
         topChildDockHeight: dockStateSize.height,
         topChildHeight: getToSectionHeight(context),
         dockStateBottomMargin: margin,
+        dockModeCornerRadius: 6,
       ),
     );
   }
@@ -144,8 +145,10 @@ class _TopSectionState extends State<TopSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.lightBlue,
       alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.lightBlue,
+      ),
       child: FlatButton(child: Text("Full Screen"),
         color: Colors.grey,
         onPressed: (){

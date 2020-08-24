@@ -25,13 +25,13 @@ class DraggablePanel extends StatefulWidget {
   final double childBetweenTopAndBottomRightMargin;
   final int autoDragAnimationDuration;
   final double dockModeCornerRadius;
-  final Color dockModeBgColor;
-  final BoxShadow dockModeShadow;
+//  final Color dockModeBgColor;
+//  final BoxShadow dockModeShadow;
   final bool resizeToAvoidBottomInset;
   final bool defaultShow;
   final DragListener listener;
 
-  DraggablePanel({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.childBetweenTopAndBottom, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.listener, this.defaultShow = true, this.defaultTopPadding, this.dockStateBottomMargin = 50, this.childBetweenTopAndBottomHeight = 10, this.childBetweenTopAndBottomWidth = double.maxFinite, this.childBetweenTopAndBottomLeftMargin = 0, this.childBetweenTopAndBottomRightMargin = 0, this.autoDragAnimationDuration = 300, this.dockStateRightMargin = 5, this.dockModeCornerRadius = 0, this.dockModeBgColor = Colors.transparent, this.dockModeShadow, this.resizeToAvoidBottomInset = false}): super(key: key) {
+  DraggablePanel({Key key, this.parent, @required this.topChild, @required this.bottomChild, this.childBetweenTopAndBottom, this.topChildHeight = 200, this.topChildDockWidth = 300, this.topChildDockHeight = 150, this.listener, this.defaultShow = true, this.defaultTopPadding, this.dockStateBottomMargin = 50, this.childBetweenTopAndBottomHeight = 10, this.childBetweenTopAndBottomWidth = double.maxFinite, this.childBetweenTopAndBottomLeftMargin = 0, this.childBetweenTopAndBottomRightMargin = 0, this.autoDragAnimationDuration = 300, this.dockStateRightMargin = 5, this.dockModeCornerRadius = 0 /*,this.dockModeBgColor = Colors.transparent, this.dockModeShadow*/, this.resizeToAvoidBottomInset = false}): super(key: key) {
     assert(topChild != null);
     assert(bottomChild != null);
   }
@@ -276,14 +276,13 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
                     if (_isFullScreen) {
                       return;
                     }
-                    if (!_isMinimised) {
-                      if (detail.primaryVelocity > 600) {
-                        _dragDown();
-                      } else if (_top < screenSize.height / 3) {
-                        _dragUp();
-                      } else {
-                        _dragDown();
-                      }
+
+                    if (detail.primaryVelocity > 600) {
+                      _dragDown();
+                    } else if (_top < screenSize.height / 3) {
+                      _dragUp();
+                    } else {
+                      _dragDown();
                     }
                   },
 
@@ -317,13 +316,6 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
                   child: Container(
                     width: _containerWidth,
                     height: _containerHeight,
-                    decoration: BoxDecoration(
-                      color: widget.dockModeBgColor,
-                      boxShadow: _isMinimised ? [
-                        widget.dockModeShadow
-                      ] : null,
-                      borderRadius: BorderRadius.all(Radius.circular(_cornerRadius)),
-                    ),
                     child: widget.topChild,
                   )
               ),
@@ -362,6 +354,7 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
     _containerWidth = screenSize.width - ((_top - _defaultTopPadding) * _minScaleX);
     _right = ((_top - _defaultTopPadding) * _scaleRightMargin);
     _cornerRadius = ((_top - _defaultTopPadding) * _scaleDockRadius);
+    print("Corner Radius: $_cornerRadius");
     if (isUp) {
       if (_containerHeight >= _originalToHeight) {
         _containerHeight = _originalToHeight;
