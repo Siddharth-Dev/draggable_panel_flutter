@@ -134,6 +134,8 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
 
   bool isDraggingVertical() => _verticalDragging;
 
+  double getCornerRadius() => _cornerRadius;
+
   minimise() {
     _dragDown();
   }
