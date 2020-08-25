@@ -310,7 +310,6 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
                       _pop = false;
                       animationD = 0;
                       _top = _top + detail.primaryDelta;
-                      widget?.listener?.onDrag(_top);
                       bool isUp = detail.primaryDelta < 0;
                       _updateVerticalState(isUp);
 
@@ -352,11 +351,11 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
   }
 
   _updateVerticalState(bool isUp) {
+    widget?.listener?.onDrag(_top);
     _containerHeight = _originalToHeight - ((_top - _defaultTopPadding) * _minScaleY);
     _containerWidth = screenSize.width - ((_top - _defaultTopPadding) * _minScaleX);
     _right = ((_top - _defaultTopPadding) * _scaleRightMargin);
     _cornerRadius = ((_top - _defaultTopPadding) * _scaleDockRadius);
-    print("Corner Radius: $_cornerRadius");
     if (isUp) {
       if (_containerHeight >= _originalToHeight) {
         _containerHeight = _originalToHeight;
