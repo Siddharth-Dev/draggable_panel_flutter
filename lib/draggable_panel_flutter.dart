@@ -433,6 +433,7 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
     _isMinimised = false;
     _horizontalDrag = 0;
     _verticalDragging = false;
+    _betweenChildVisible = true;
   }
 
   _dragDownState() {
