@@ -303,6 +303,13 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
                     if (_isFullScreen) {
                       return;
                     }
+
+                    bool isUp = detail.primaryDelta < 0;
+
+                    if (isMaximised() && isUp) {
+                      return;
+                    }
+
                     setState(() {
                       _betweenChildVisible = false;
                     });
@@ -310,7 +317,6 @@ class DraggableState extends State<DraggablePanel> with SingleTickerProviderStat
                       _pop = false;
                       animationD = 0;
                       _top = _top + detail.primaryDelta;
-                      bool isUp = detail.primaryDelta < 0;
                       _updateVerticalState(isUp);
 
                   },
