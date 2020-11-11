@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class OrientationUtils {
-
   static setPortraitModeAll() {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,

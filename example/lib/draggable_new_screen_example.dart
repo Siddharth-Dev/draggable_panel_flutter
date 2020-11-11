@@ -4,12 +4,12 @@ import 'package:draggable_panel_flutter/transparent_page_route.dart';
 import 'package:flutter/material.dart';
 
 class DraggableExampleOne extends StatelessWidget implements DragListener {
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      appBar: AppBar(title: Text("Draggable As new screen"),),
+      appBar: AppBar(
+        title: Text("Draggable As new screen"),
+      ),
       body: Container(
         alignment: Alignment.center,
         child: FlatButton(
@@ -17,22 +17,28 @@ class DraggableExampleOne extends StatelessWidget implements DragListener {
           child: Text("Open Pannel"),
           onPressed: () {
             Navigator.of(context).push(TransparentRoute(
-              builder: (ctx) => DraggablePanel(
-                topChild: Container(color: Colors.blue, alignment: Alignment.center, child: Icon(Icons.filter, size: 50,),),
-                bottomChild: Container(color:  Colors.red,),
-                listener: this,
-              )
-            ));
+                builder: (ctx) => DraggablePanel(
+                      topChild: Container(
+                        color: Colors.blue,
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.filter,
+                          size: 50,
+                        ),
+                      ),
+                      bottomChild: Container(
+                        color: Colors.red,
+                      ),
+                      listener: this,
+                    )));
           },
         ),
       ),
-
     );
   }
 
   @override
-  onDrag(double dragPosition) {
-  }
+  onDrag(double dragPosition) {}
 
   @override
   onExit(BuildContext context) {
@@ -40,17 +46,11 @@ class DraggableExampleOne extends StatelessWidget implements DragListener {
   }
 
   @override
-  onMaximised() {
-  }
+  onMaximised() {}
 
   @override
-  onMinimised() {
-  }
+  onMinimised() {}
 
   @override
-  onFullScreen() {
-  }
-
-
-
+  onFullScreen() {}
 }

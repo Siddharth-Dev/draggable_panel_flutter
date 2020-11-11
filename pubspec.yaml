@@ -1,8 +1,9 @@
 name: draggable_panel_flutter
 description: Plugin to replicate the DraggablePanel functionality as in Draggable panel in Android.
-version: 0.0.5
+version: 0.0.6
 author: Siddharth Jain (siddharth11241@gmail.com)
-homepage:
+homepage: https://github.com/Siddharth-Dev/draggable_panel_flutter
+repository: https://github.com/Siddharth-Dev/draggable_panel_flutter
 
 environment:
   sdk: ">=2.7.0 <3.0.0"

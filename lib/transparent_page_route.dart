@@ -36,6 +36,5 @@ class TransparentRoute extends PageRoute<void> {
         child: result,
       ),
     );
-
   }
 }

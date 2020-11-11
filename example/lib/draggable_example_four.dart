@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 class DraggableExampleFour extends StatefulWidget {
-
   DraggableExampleState createState() => DraggableExampleState();
 }
 
 class DraggableExampleState extends State<DraggableExampleFour> {
-
   GlobalKey<DraggableState> _globalKey = GlobalKey<DraggableState>();
   int _currentTabIndex = 0;
   List<Widget> widgetsAdded = List();
@@ -29,7 +27,8 @@ class DraggableExampleState extends State<DraggableExampleFour> {
   @override
   Widget build(BuildContext context) {
     Size dockStateSize = getDockPanelSize(context);
-    final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - 14 / 2.0, 0.0);
+    final double additionalBottomPadding =
+        math.max(MediaQuery.of(context).padding.bottom - 14 / 2.0, 0.0);
     double margin = kBottomNavigationBarHeight + additionalBottomPadding;
     return WillPopScope(
       onWillPop: onBackPressed,
@@ -39,15 +38,18 @@ class DraggableExampleState extends State<DraggableExampleFour> {
           appBar: AppBar(
             title: Text("Draggable code in same stack"),
           ),
-
           bottomNavigationBar: BottomNavigationBar(
             items: [
-            BottomNavigationBarItem(icon: Icon(Icons.home), title: Text("Home")),
-            BottomNavigationBarItem(icon: Icon(Icons.contacts), title: Text("Contact")),
-            BottomNavigationBarItem(icon: Icon(Icons.list), title: Text("My List")),
-            BottomNavigationBarItem(icon: Icon(Icons.explore), title: Text("Explore")),
-          ],
-            onTap: (index){
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.home), title: Text("Home")),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.contacts), title: Text("Contact")),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.list), title: Text("My List")),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.explore), title: Text("Explore")),
+            ],
+            onTap: (index) {
               print("Tab $index cliked");
               _currentTabIndex = index;
               setState(() {});
@@ -57,25 +59,28 @@ class DraggableExampleState extends State<DraggableExampleFour> {
             selectedItemColor: Colors.blue,
             unselectedItemColor: Colors.black,
           ),
-
           body: Column(
-
             children: <Widget>[
-
-              Padding( padding: EdgeInsets.all(15),child: Text("Tab ${_currentTabIndex+1}")),
-              SizedBox(height: 20,),
+              Padding(
+                  padding: EdgeInsets.all(15),
+                  child: Text("Tab ${_currentTabIndex + 1}")),
+              SizedBox(
+                height: 20,
+              ),
               FlatButton(
                 color: Colors.grey,
                 child: Text("Open widget in between"),
-                onPressed: (){
+                onPressed: () {
                   _addWidgetsInBetween(NewScreen("Settings", this));
                 },
               ),
-              SizedBox(height: 20,),
+              SizedBox(
+                height: 20,
+              ),
               FlatButton(
                 color: Colors.grey,
                 child: Text("Open Player"),
-                onPressed: (){
+                onPressed: () {
                   _globalKey.currentState.resetAttributes();
                   _globalKey.currentState.show(reset: true);
                 },
@@ -83,7 +88,7 @@ class DraggableExampleState extends State<DraggableExampleFour> {
             ],
           ),
         ),
-        topChild:  TopSectionWidget(_globalKey),
+        topChild: TopSectionWidget(_globalKey),
         bottomChild: BottomChild(),
         childBetweenTopAndBottom: SliderWidget(),
         childBetweenTopAndBottomHeight: 14,
@@ -101,7 +106,6 @@ class DraggableExampleState extends State<DraggableExampleFour> {
   }
 
   Future<bool> onBackPressed() async {
-
     if (widgetsAdded.length > 0) {
       Widget widget = widgetsAdded.removeLast();
       _globalKey.currentState.removeWidget(widget);
@@ -123,7 +127,6 @@ class DraggableExampleState extends State<DraggableExampleFour> {
 }
 
 class TopSectionWidget extends StatefulWidget {
-
   final GlobalKey<DraggableState> _globalKey;
 
   TopSectionWidget(this._globalKey);
@@ -133,9 +136,8 @@ class TopSectionWidget extends StatefulWidget {
     return _TopSectionState();
   }
 }
+
 class _TopSectionState extends State<TopSectionWidget> {
-
-
   @override
   void initState() {
     print("Top init");
@@ -149,11 +151,13 @@ class _TopSectionState extends State<TopSectionWidget> {
       decoration: BoxDecoration(
         color: Colors.lightBlue,
       ),
-      child: FlatButton(child: Text("Full Screen"),
+      child: FlatButton(
+        child: Text("Full Screen"),
         color: Colors.grey,
-        onPressed: (){
+        onPressed: () {
           widget._globalKey.currentState.setFullScreen();
-        },),
+        },
+      ),
     );
   }
 
@@ -165,7 +169,6 @@ class _TopSectionState extends State<TopSectionWidget> {
 }
 
 class BottomChild extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -174,17 +177,16 @@ class BottomChild extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Text("Hello welcome to this awesome example"),
-          SizedBox(height: 20,),
+          SizedBox(
+            height: 20,
+          ),
         ],
-
       ),
-
     );
   }
 }
 
 class NewScreen extends StatelessWidget {
-
   final String title;
   final DraggableExampleState _draggableState;
 
@@ -196,7 +198,9 @@ class NewScreen extends StatelessWidget {
       appBar: getAppBarForNewScreen(title),
       body: Container(
         color: Colors.orange,
-        child: Center(child: Text("New Screen"),),
+        child: Center(
+          child: Text("New Screen"),
+        ),
       ),
     );
   }
@@ -205,9 +209,12 @@ class NewScreen extends StatelessWidget {
     return AppBar(
       elevation: 2,
       title: Text(title),
-      leading: IconButton(icon: Icon(Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back), onPressed: () {
-        _draggableState.onBackPressed();
-      },),
+      leading: IconButton(
+        icon: Icon(Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back),
+        onPressed: () {
+          _draggableState.onBackPressed();
+        },
+      ),
       automaticallyImplyLeading: true,
     );
   }
@@ -218,20 +225,18 @@ class SliderWidget extends StatefulWidget {
   SliderWidgetState createState() => new SliderWidgetState();
 }
 
-class SliderWidgetState extends State{
-
+class SliderWidgetState extends State {
   double valueHolder = 20;
 
   @override
   Widget build(BuildContext context) {
     return SliderTheme(
       data: SliderThemeData(
-        trackShape: CustomTrackShape(),
-        activeTrackColor: Colors.white,
-        inactiveTrackColor: Colors.black,
-        disabledActiveTrackColor: Colors.brown,
-        disabledInactiveTrackColor: Colors.amberAccent
-      ),
+          trackShape: CustomTrackShape(),
+          activeTrackColor: Colors.white,
+          inactiveTrackColor: Colors.black,
+          disabledActiveTrackColor: Colors.brown,
+          disabledInactiveTrackColor: Colors.amberAccent),
       child: Slider(
         value: valueHolder,
         activeColor: Colors.white,
@@ -257,7 +262,8 @@ class CustomTrackShape extends RoundedRectSliderTrackShape {
   }) {
     final double trackHeight = sliderTheme.trackHeight;
     final double trackLeft = offset.dx;
-    final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
+    final double trackTop =
+        offset.dy + (parentBox.size.height - trackHeight) / 2;
     final double trackWidth = parentBox.size.width;
     return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
   }
